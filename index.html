@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I'm Hired — Tailored to Win</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #0d0d0d; color: #f0ede8; min-height: 100vh; }
+
+/* TICKER */
+.ticker { background: #c9a96e; padding: 7px 32px; overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: inline-block; animation: ticker 35s linear infinite; font-size: 11px; font-weight: 500; color: #0d0d0d; letter-spacing: 0.12em; text-transform: uppercase; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* HERO */
+.hero { position: relative; overflow: hidden; height: 200px; background: #0d0d0d; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 28px; }
+.hero-canvas { position: absolute; inset: 0; }
+.hero-canvas svg { width: 100%; height: 100%; }
+.hero-content { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-end; }
+.hero-left {}
+.hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #c9a96e; margin-bottom: 4px; font-weight: 400; }
+.hero-title { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; line-height: 1; color: #f0ede8; }
+.hero-title span { color: #c9a96e; }
+.hero-tagline { font-size: 12px; color: #6b6660; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
+.hero-right { text-align: right; }
+.hero-time { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 700; color: #f0ede8; line-height: 1; }
+.hero-date { font-size: 11px; color: #9a9488; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+.hero-tz { font-size: 10px; color: #c9a96e; letter-spacing: 0.1em; margin-top: 2px; }
+.hero-line { height: 1px; background: linear-gradient(90deg, #c9a96e 0%, #c9a96e44 60%, transparent 100%); }
+
+/* NAV */
+.nav { display: flex; background: #141414; border-bottom: 1px solid #222; padding: 0 40px; }
+.nav-btn { padding: 14px 20px; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 400; color: #6b6660; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; letter-spacing: 0.08em; text-transform: uppercase; }
+.nav-btn.active { color: #c9a96e; border-bottom-color: #c9a96e; font-weight: 500; }
+.nav-btn:hover:not(.active) { color: #f0ede8; }
+
+/* MAIN */
+.main { padding: 28px 40px; max-width: 1200px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* CARDS */
+.card { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+.step-label { font-size: 10px; font-weight: 500; color: #c9a96e; background: #1a160a; border: 1px solid #2e2510; border-radius: 20px; padding: 2px 10px; display: inline-block; margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.field-label { font-size: 10px; font-weight: 500; color: #6b6660; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; display: block; }
+.field-hint { font-size: 12px; color: #444; margin-bottom: 8px; line-height: 1.5; }
+
+/* INPUTS */
+input[type=text] { width: 100%; padding: 9px 13px; font-size: 14px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0d0d0d; color: #f0ede8; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s; }
+input[type=text]:focus { outline: none; border-color: #c9a96e; box-shadow: 0 0 0 2px rgba(201,169,110,0.12); }
+textarea { width: 100%; padding: 10px 13px; font-size: 13px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0d0d0d; color: #f0ede8; font-family: 'DM Sans', sans-serif; resize: vertical; line-height: 1.6; transition: border-color 0.15s; }
+textarea:focus { outline: none; border-color: #c9a96e; box-shadow: 0 0 0 2px rgba(201,169,110,0.12); }
+.ta-sm { min-height: 80px; }
+.ta-md { min-height: 170px; }
+.ta-lg { min-height: 200px; }
+select { width: 100%; padding: 9px 13px; font-size: 13px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0d0d0d; color: #f0ede8; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+select:focus { outline: none; border-color: #c9a96e; }
+
+/* GRID */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.four-col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+/* BUTTONS */
+.btn-primary { background: #c9a96e; color: #0d0d0d; border: none; border-radius: 8px; padding: 11px 26px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.04em; transition: all 0.15s; }
+.btn-primary:hover { background: #dbbf87; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: none; color: #6b6660; border: 1px solid #2a2a2a; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-ghost:hover { border-color: #c9a96e; color: #c9a96e; }
+.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { font-size: 11px; padding: 4px 10px; border-radius: 6px; }
+.btn-danger { background: none; color: #c96e6e; border: 1px solid #3a2222; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-danger:hover { background: #1a0d0d; }
+.btn-row { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+.status-text { font-size: 12px; color: #7aab8a; }
+
+/* ADDONS */
+.addons-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.addon-chip { display: flex; align-items: center; gap: 8px; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
+.addon-chip:hover { border-color: #c9a96e; }
+.addon-chip.selected { border-color: #c9a96e; background: #1a160a; }
+.addon-chip input[type=checkbox] { accent-color: #c9a96e; width: 14px; height: 14px; cursor: pointer; }
+.addon-chip-label { font-size: 13px; color: #9a9488; cursor: pointer; }
+.addon-chip.selected .addon-chip-label { color: #c9a96e; }
+
+/* DIVIDER */
+.divider { height: 1px; background: linear-gradient(90deg, #c9a96e44 0%, #1e1e1e 100%); margin: 24px 0; }
+
+/* OUTPUTS */
+.output-card { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+.output-label { font-size: 10px; font-weight: 500; color: #c9a96e; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.result-box { font-size: 13px; line-height: 1.8; color: #c8c4be; min-height: 60px; }
+.result-box.placeholder { color: #333; font-style: italic; }
+.result-box h1,.result-box h2,.result-box h3 { color: #f0ede8; font-family: 'Playfair Display', serif; margin-bottom: 6px; margin-top: 14px; font-size: 14px; }
+.result-box ul { padding-left: 18px; }
+.result-box li { margin-bottom: 5px; }
+.result-box strong { color: #c9a96e; font-weight: 500; }
+.result-box p { margin-bottom: 8px; }
+
+/* SCORE */
+.score-card { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 10px; padding: 20px 24px; margin-bottom: 14px; }
+.score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.score-title { font-size: 10px; font-weight: 500; color: #c9a96e; text-transform: uppercase; letter-spacing: 0.1em; }
+.score-big { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: #f0ede8; line-height: 1; }
+.score-denom { font-size: 20px; color: #6b6660; }
+.score-label { font-size: 12px; color: #9a9488; margin-top: 4px; }
+.score-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.score-bar-item { }
+.score-bar-label { font-size: 11px; color: #6b6660; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.score-bar-track { height: 4px; background: #1e1e1e; border-radius: 2px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #c9a96e, #dbbf87); transition: width 1s ease; }
+.score-summary { font-size: 13px; color: #9a9488; line-height: 1.7; margin-top: 14px; padding-top: 14px; border-top: 1px solid #1e1e1e; }
+
+/* LOADING */
+.loading { display: flex; align-items: center; gap: 10px; color: #6b6660; font-size: 13px; padding: 12px 0; }
+.dots span { width: 5px; height: 5px; border-radius: 50%; background: #c9a96e; display: inline-block; animation: pulse 1.2s ease-in-out infinite; margin-right: 2px; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+/* LIBRARY */
+.lib-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.lib-search { flex: 1; min-width: 180px; }
+.lib-entry { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; transition: border-color 0.15s; }
+.lib-entry:hover { border-color: #2a2a2a; }
+.lib-entry-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.lib-entry-title { font-size: 15px; font-weight: 500; color: #f0ede8; margin-bottom: 2px; }
+.lib-entry-meta { font-size: 11px; color: #444; }
+.lib-entry-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.lib-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 10px; background: #1a160a; color: #c9a96e; border: 1px solid #2e2510; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.lib-preview { font-size: 12px; color: #6b6660; margin-top: 8px; line-height: 1.5; border-left: 2px solid #c9a96e44; padding-left: 10px; }
+.score-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; background: #0d1a12; color: #7aab8a; border: 1px solid #1a2e1a; margin-left: 8px; }
+.empty-state { text-align: center; padding: 48px 24px; color: #333; }
+.empty-icon { font-size: 36px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; color: #6b6660; font-weight: 500; margin-bottom: 6px; }
+.empty-sub { font-size: 13px; }
+
+/* MODAL */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 20px; }
+.modal-backdrop.open { display: flex; }
+.modal { background: #141414; border: 1px solid #2a2a2a; border-radius: 14px; padding: 28px; width: 800px; max-width: 100%; }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #f0ede8; margin-bottom: 6px; }
+.modal-meta { font-size: 12px; color: #6b6660; margin-bottom: 20px; }
+.modal-section { margin-bottom: 18px; }
+.modal-section-label { font-size: 10px; font-weight: 500; color: #c9a96e; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.modal-content { font-size: 13px; line-height: 1.8; color: #c8c4be; background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 8px; padding: 14px; white-space: pre-wrap; }
+.modal-content h1,.modal-content h2,.modal-content h3 { color: #f0ede8; font-size: 14px; margin-bottom: 6px; margin-top: 12px; }
+.modal-content ul { padding-left: 18px; }
+.modal-content li { margin-bottom: 4px; }
+.modal-content strong { color: #c9a96e; }
+.modal-content p { margin-bottom: 6px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+
+/* SAVED BADGE */
+.saved-badge { font-size: 11px; color: #7aab8a; background: #0d1a12; border: 1px solid #1a2e1a; border-radius: 6px; padding: 2px 8px; }
+
+/* PRINT */
+@media print {
+  body { background: white; color: #0d0d0d; }
+  .ticker, .hero, .hero-line, .nav, .btn-row, .card, .addon-chip, .divider, .modal-backdrop { display: none !important; }
+  .main { padding: 0; }
+  .output-card, .score-card { background: white; border: 1px solid #ddd; color: #0d0d0d; break-inside: avoid; }
+  .output-label { color: #1F3864; }
+  .result-box, .score-summary, .modal-content { color: #0d0d0d; }
+  .result-box h1,.result-box h2,.result-box h3 { color: #0d0d0d; }
+  .result-box strong { color: #1F3864; }
+  .score-big { color: #0d0d0d; }
+  .score-bar-track { background: #eee; }
+  #output-section { display: block !important; }
+}
+
+@media(max-width:768px) {
+  .two-col,.three-col,.four-col { grid-template-columns: 1fr; }
+  .score-bars { grid-template-columns: 1fr; }
+  .main { padding: 20px; }
+  .hero { height: 170px; padding: 0 20px 20px; }
+  .hero-title { font-size: 32px; }
+  .hero-time { font-size: 26px; }
+  .nav { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="ticker">
+  <span class="ticker-inner">
+    I'm Hired — Tailored to Win &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp; I'm Hired — Tailored to Win &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp;
+  </span>
+</div>
+
+<div class="hero">
+  <div class="hero-canvas">
+    <svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="200" fill="#0d0d0d"/>
+      <path d="M -100 280 Q 400 -70 900 170 Q 1100 230 1300 90" stroke="#c9a96e" stroke-width="0.5" fill="none" opacity="0.3"/>
+      <path d="M -100 260 Q 450 -50 950 150 Q 1150 210 1300 70" stroke="#c9a96e" stroke-width="0.5" fill="none" opacity="0.15"/>
+      <line x1="0" y1="50" x2="1200" y2="50" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="0" y1="100" x2="1200" y2="100" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="0" y1="150" x2="1200" y2="150" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="200" y1="0" x2="200" y2="200" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="400" y1="0" x2="400" y2="200" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="600" y1="0" x2="600" y2="200" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="800" y1="0" x2="800" y2="200" stroke="#1e1e1e" stroke-width="0.5"/>
+      <line x1="1000" y1="0" x2="1000" y2="200" stroke="#1e1e1e" stroke-width="0.5"/>
+      <polygon points="980,18 1042,18 1073,68 1042,118 980,118 949,68" stroke="#c9a96e" stroke-width="0.75" fill="none" opacity="0.2"/>
+      <polygon points="1008,32 1052,32 1074,68 1052,104 1008,104 986,68" stroke="#c9a96e" stroke-width="0.5" fill="none" opacity="0.1"/>
+      <rect x="55" y="18" width="58" height="58" stroke="#c9a96e" stroke-width="0.5" fill="none" opacity="0.1" transform="rotate(15,84,47)"/>
+      <line x1="0" y1="0" x2="0" y2="200" stroke="#c9a96e" stroke-width="2"/>
+      <circle cx="200" cy="100" r="2" fill="#c9a96e" opacity="0.4"/>
+      <circle cx="400" cy="50" r="1.5" fill="#c9a96e" opacity="0.3"/>
+      <circle cx="600" cy="150" r="2" fill="#c9a96e" opacity="0.25"/>
+      <circle cx="800" cy="100" r="1.5" fill="#c9a96e" opacity="0.3"/>
+      <circle cx="1000" cy="50" r="2" fill="#c9a96e" opacity="0.2"/>
+      <defs>
+        <linearGradient id="rfade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="60%" stop-color="#0d0d0d" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#0d0d0d" stop-opacity="0.7"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="200" fill="url(#rfade)"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Career Command Center</div>
+      <div class="hero-title">I'm <span>Hired</span></div>
+      <div class="hero-tagline">Tailored to Win</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-time" id="live-time">--:-- --</div>
+      <div class="hero-date" id="live-date">Loading...</div>
+      <div class="hero-tz">Eastern Time</div>
+    </div>
+  </div>
+</div>
+<div class="hero-line"></div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchTab('tailor',this)">Resume Tailor</button>
+  <button class="nav-btn" onclick="switchTab('library',this)">Saved Results <span id="lib-badge" style="font-size:10px;background:#1a160a;color:#c9a96e;border:1px solid #2e2510;border-radius:10px;padding:1px 7px;margin-left:4px;"></span></button>
+</div>
+
+<div class="main">
+
+  <!-- TAILOR TAB -->
+  <div class="view active" id="view-tailor">
+
+    <!-- STEP 1 -->
+    <div class="card">
+      <span class="step-label">Step 1 — Target Role</span>
+      <div class="two-col">
+        <div>
+          <label class="field-label">Job title *</label>
+          <input type="text" id="job-title" placeholder="e.g. Talent Acquisition Specialist, Administrative Officer GS-13">
+        </div>
+        <div>
+          <label class="field-label">Company / Agency (optional)</label>
+          <input type="text" id="job-company" placeholder="e.g. Amazon, NIH, Deloitte">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+        <span class="step-label">Step 2 — Your Work History</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="saved-badge" id="saved-badge" style="display:none;">✓ Saved</span>
+          <button class="btn-ghost btn-sm" onclick="saveHistory()">Save history</button>
+          <button class="btn-ghost btn-sm" onclick="clearHistory()">Clear saved</button>
+        </div>
+      </div>
+      <label class="field-label" style="margin-top:8px;">Paste your full resume or work history</label>
+      <span class="field-hint">Include all roles, bullets, dates, and metrics. Click Save to store it — paste once, use forever.</span>
+      <textarea class="ta-lg" id="work-history" placeholder="Paste your full work history here — all roles, all bullets, dates, and metrics..."></textarea>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="card">
+      <span class="step-label">Step 3 — Job Details</span>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <label class="field-label">Job duties & responsibilities</label>
+          <span class="field-hint">What you'll be doing day to day.</span>
+          <textarea class="ta-md" id="job-duties" placeholder="Paste the duties and responsibilities from the job posting..."></textarea>
+        </div>
+        <div>
+          <label class="field-label">Required qualifications</label>
+          <span class="field-hint">What they're screening for — skills, experience, requirements.</span>
+          <textarea class="ta-md" id="job-quals" placeholder="Paste the qualifications and what they're seeking in a candidate..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="card">
+      <span class="step-label">Step 4 — Optional Add-ons</span>
+      <span class="field-hint" style="margin-top:6px;display:block;">Bullets, summary, competencies, keywords, and strength score are always generated. Add extras:</span>
+      <div class="addons-row">
+        <label class="addon-chip" id="chip-cover" onclick="toggleChip('cover')">
+          <input type="checkbox" id="addon-cover"> <span class="addon-chip-label">Cover letter</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="gen-btn" onclick="generateAll()">Generate ↗</button>
+      <button class="btn-ghost" onclick="clearForm()">Clear job fields</button>
+      <button class="btn-ghost" onclick="openInClaude()">Open in Claude ↗</button>
+      <button class="btn-ghost" onclick="window.print()">Print / Export</button>
+      <span class="status-text" id="status-text"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div id="output-section" style="display:none;">
+
+      <!-- SCORE -->
+      <div class="score-card" id="score-card">
+        <div class="score-header">
+          <div>
+            <div class="score-title">Candidate Strength Score</div>
+            <div class="score-label" id="score-label">Analyzing...</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="score-big"><span id="score-num">--</span><span class="score-denom">/100</span></div>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Keyword Match</span><span id="bar-kw">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-kw" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Experience Alignment</span><span id="bar-exp">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-exp" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Qualifications Coverage</span><span id="bar-qual">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-qual" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Overall Competitiveness</span><span id="bar-overall">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-overall" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="score-summary" id="score-summary">Generating your strength assessment...</div>
+      </div>
+
+      <!-- CORE OUTPUTS -->
+      <div class="two-col" style="margin-bottom:14px;">
+        <div class="output-card">
+          <div class="output-label">Tailored bullet points <button class="btn-ghost btn-sm" onclick="copyOut('bullets-out')">Copy</button></div>
+          <div class="result-box placeholder" id="bullets-out">Your tailored bullets will appear here...</div>
+        </div>
+        <div class="output-card">
+          <div class="output-label">Professional summary <button class="btn-ghost btn-sm" onclick="copyOut('summary-out')">Copy</button></div>
+          <div class="result-box placeholder" id="summary-out">Your professional summary will appear here...</div>
+        </div>
+      </div>
+
+      <div class="output-card" style="margin-bottom:14px;">
+        <div class="output-label">Core competencies block <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">— paste directly below your summary</span> <button class="btn-ghost btn-sm" onclick="copyOut('competencies-out')">Copy</button></div>
+        <div class="result-box placeholder" id="competencies-out">Your tailored competencies block will appear here...</div>
+      </div>
+
+      <div class="output-card" style="margin-bottom:14px;">
+        <div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick="copyOut('keywords-out')">Copy</button></div>
+        <div class="result-box placeholder" id="keywords-out">Keywords analysis will appear here...</div>
+      </div>
+
+      <div id="addon-outputs"></div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="saveToLibrary()">Save to library</button>
+        <button class="btn-ghost" onclick="window.print()">Print / Export</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY TAB -->
+  <div class="view" id="view-library">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:11px;font-weight:500;color:#c9a96e;text-transform:uppercase;letter-spacing:0.1em;">Saved Results</div>
+        <div class="lib-controls" style="margin:0;">
+          <input type="text" id="lib-search" placeholder="Search by title or company..." style="width:220px;font-size:13px;" oninput="renderLibrary()">
+          <select id="lib-sort" onchange="renderLibrary()" style="width:160px;">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="title">By job title</option>
+            <option value="company">By company</option>
+            <option value="score">By score</option>
+          </select>
+        </div>
+      </div>
+      <div id="lib-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-backdrop" id="view-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="printModal()">Print</button>
+      <button class="btn-ghost" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>
+const LS_HISTORY = 'imhired_work_history';
+const LS_LIBRARY = 'imhired_library';
+
+let library = JSON.parse(localStorage.getItem(LS_LIBRARY) || '[]');
+let lastOutputs = {};
+let currentModalId = null;
+
+function saveLib() { localStorage.setItem(LS_LIBRARY, JSON.stringify(library)); }
+
+/* CLOCK */
+function updateClock() {
+  const est = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const h = est.getHours(), m = est.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  document.getElementById('live-time').textContent = h12 + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('live-date').textContent = days[est.getDay()] + ', ' + months[est.getMonth()] + ' ' + est.getDate() + ', ' + est.getFullYear();
+}
+updateClock(); setInterval(updateClock, 1000);
+
+/* TABS */
+function switchTab(tab, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  el.classList.add('active');
+  if (tab === 'library') renderLibrary();
+}
+
+/* HISTORY */
+function loadSavedHistory() {
+  const saved = localStorage.getItem(LS_HISTORY);
+  if (saved) {
+    document.getElementById('work-history').value = saved;
+    document.getElementById('saved-badge').style.display = 'inline-block';
+  }
+}
+
+function saveHistory() {
+  const val = document.getElementById('work-history').value.trim();
+  if (!val) { alert('Please paste your work history first.'); return; }
+  localStorage.setItem(LS_HISTORY, val);
+  document.getElementById('saved-badge').style.display = 'inline-block';
+  const btn = event.target;
+  btn.textContent = 'Saved!';
+  setTimeout(() => btn.textContent = 'Save history', 2000);
+}
+
+function clearHistory() {
+  if (!confirm('Clear your saved work history?')) return;
+  localStorage.removeItem(LS_HISTORY);
+  document.getElementById('work-history').value = '';
+  document.getElementById('saved-badge').style.display = 'none';
+}
+
+/* ADDONS */
+function toggleChip(id) {
+  const chip = document.getElementById('chip-' + id);
+  const cb = document.getElementById('addon-' + id);
+  cb.checked = !cb.checked;
+  chip.classList.toggle('selected', cb.checked);
+}
+
+/* HELPERS */
+function loading(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = '<div class="loading"><div class="dots"><span></span><span></span><span></span></div> ' + msg + '</div>'; el.classList.remove('placeholder'); }
+}
+
+function renderOut(id, text) {
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = marked.parse(text); el.classList.remove('placeholder'); }
+}
+
+async function callClaude(system, user) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system, messages: [{ role: 'user', content: user }] })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.find(b => b.type === 'text')?.text || '';
+}
+
+/* SCORE RENDERING */
+function renderScore(scoreData) {
+  try {
+    const s = typeof scoreData === 'string' ? JSON.parse(scoreData.match(/\{[\s\S]*\}/)?.[0] || '{}') : scoreData;
+    const overall = s.overall || 0;
+    document.getElementById('score-num').textContent = overall;
+    document.getElementById('score-label').textContent = overall >= 85 ? 'Strong Candidate' : overall >= 70 ? 'Competitive Candidate' : overall >= 55 ? 'Developing Match' : 'Needs Tailoring';
+    const bars = { kw: s.keyword_match || 0, exp: s.experience_alignment || 0, qual: s.qualifications_coverage || 0, overall: overall };
+    Object.entries(bars).forEach(([k, v]) => {
+      document.getElementById('bar-' + k).textContent = v + '%';
+      setTimeout(() => { document.getElementById('fill-' + k).style.width = v + '%'; }, 100);
+    });
+    document.getElementById('score-summary').textContent = s.summary || '';
+    return overall;
+  } catch(e) {
+    document.getElementById('score-summary').textContent = scoreData;
+    return 0;
+  }
+}
+
+/* GENERATE */
+async function generateAll() {
+  const title = document.getElementById('job-title').value.trim();
+  const company = document.getElementById('job-company').value.trim();
+  const history = document.getElementById('work-history').value.trim();
+  const duties = document.getElementById('job-duties').value.trim();
+  const quals = document.getElementById('job-quals').value.trim();
+  const wantCover = document.getElementById('addon-cover').checked;
+
+  if (!history) { alert('Please paste your work history in Step 2.'); return; }
+  if (!duties && !quals) { alert('Please paste at least the job duties or qualifications in Step 3.'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  document.getElementById('status-text').textContent = '';
+  document.getElementById('output-section').style.display = 'block';
+
+  loading('bullets-out', 'Tailoring your bullet points...');
+  loading('summary-out', 'Crafting your professional summary...');
+  loading('competencies-out', 'Building your competencies block...');
+  loading('keywords-out', 'Running keywords gap analysis...');
+  document.getElementById('score-num').textContent = '--';
+  document.getElementById('score-label').textContent = 'Analyzing...';
+  document.getElementById('score-summary').textContent = 'Generating your strength assessment...';
+  ['kw','exp','qual','overall'].forEach(k => { document.getElementById('fill-' + k).style.width = '0%'; document.getElementById('bar-' + k).textContent = '--%'; });
+
+  const addonEl = document.getElementById('addon-outputs');
+  addonEl.innerHTML = '';
+  if (wantCover) {
+    addonEl.innerHTML = `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick="copyOut('cover-out')">Copy</button></div><div class="result-box placeholder" id="cover-out">Your cover letter will appear here...</div></div>`;
+    loading('cover-out', 'Drafting your cover letter...');
+  }
+
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information.`;
+
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+
+  const promises = [
+    callClaude(system, `${ctx}\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Weight the most relevant roles more heavily based on the target job title. Add and expand bullets where there are gaps — do not remove original content. Weave in all quantifiable metrics. Use strong action verbs. Format as bullet points grouped by role with the role title as a bold header.`),
+
+    callClaude(system, `${ctx}\n\nTASK: Write a powerful 4-5 sentence professional summary positioning this candidate for the target role. Lead with years of experience and core expertise. Mirror language from both job duties AND qualifications. Include 2-3 specific metrics from the work history. Close with a confident statement about what this candidate brings. No first-person statements.`),
+
+    callClaude(system, `${ctx}\n\nTASK: Generate a tailored Core Competencies block for this specific role. Select the top 12 competencies ranked by relevance to this posting. Format them as a pipe-separated list ready to paste directly into a resume, like this:\nFull-Cycle Recruiting  |  Talent Acquisition  |  Workforce Planning  |  [etc]\n\nAfter the block, add a brief ranked list showing which 3 competencies are highest priority for this specific role and why.`),
+
+    callClaude(system, `${ctx}\n\nTASK: Perform a keyword gap analysis with three sections:\n\n**KEY KEYWORDS FROM THE POSTING** — most important terms ATS systems will scan for\n\n**COVERED IN RESUME** — which keywords already appear in the work history\n\n**GAPS TO ADDRESS** — missing keywords with a specific suggestion for how to incorporate each one naturally`),
+
+    callClaude(system, `${ctx}\n\nTASK: Score this candidate for this specific role. Return a JSON object with these exact fields:\n{\n  "overall": [0-100 integer],\n  "keyword_match": [0-100 integer],\n  "experience_alignment": [0-100 integer],\n  "qualifications_coverage": [0-100 integer],\n  "summary": "[2-3 sentence plain English assessment — what is strong, what the gaps are, and what score they could reach with the recommended additions. Be honest and specific.]"\n}\n\nReturn ONLY the JSON object, nothing else.`)
+  ];
+
+  if (wantCover) promises.push(callClaude(system, `${ctx}\n\nTASK: Write a compelling cover letter for this role. 4 paragraphs: 1) Strong opening naming the role with the strongest qualification, 2) Most relevant experience with specific metrics, 3) What uniquely positions this candidate for this role, 4) Confident closing with a call to action. Professional but personable. No generic openings like "I am writing to apply."`));
+
+  try {
+    const results = await Promise.all(promises);
+    lastOutputs = { title, company, bullets: results[0], summary: results[1], competencies: results[2], keywords: results[3], scoreRaw: results[4], cover: wantCover ? results[5] : null };
+
+    renderOut('bullets-out', results[0]);
+    renderOut('summary-out', results[1]);
+    renderOut('competencies-out', results[2]);
+    renderOut('keywords-out', results[3]);
+    const score = renderScore(results[4]);
+    lastOutputs.score = score;
+    if (wantCover && results[5]) renderOut('cover-out', results[5]);
+    document.getElementById('status-text').textContent = 'Done — review, copy, or save your results below.';
+  } catch(err) {
+    document.getElementById('bullets-out').textContent = 'Error connecting to AI: ' + err.message + '. Try the "Open in Claude" button instead.';
+    document.getElementById('status-text').textContent = '';
+  }
+
+  btn.disabled = false; btn.textContent = 'Generate ↗';
+}
+
+/* COPY */
+function copyOut(id) {
+  const el = document.getElementById(id); if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = event.target; const orig = btn.textContent;
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+/* CLEAR */
+function clearForm() {
+  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addon-cover').checked = false;
+  document.getElementById('chip-cover').classList.remove('selected');
+  document.getElementById('addon-outputs').innerHTML = '';
+  document.getElementById('output-section').style.display = 'none';
+  document.getElementById('status-text').textContent = '';
+  lastOutputs = {};
+}
+
+/* SAVE TO LIBRARY */
+function saveToLibrary() {
+  if (!lastOutputs.bullets) { alert('Please generate results first.'); return; }
+  const entry = {
+    id: Date.now(),
+    title: lastOutputs.title || 'Untitled',
+    company: lastOutputs.company || '',
+    score: lastOutputs.score || 0,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) + ' ET',
+    bullets: lastOutputs.bullets,
+    summary: lastOutputs.summary,
+    competencies: lastOutputs.competencies,
+    keywords: lastOutputs.keywords,
+    cover: lastOutputs.cover || null
+  };
+  library.unshift(entry);
+  saveLib(); updateLibBadge();
+  const btn = event.target; btn.textContent = 'Saved!';
+  setTimeout(() => btn.textContent = 'Save to library', 2000);
+}
+
+/* LIBRARY */
+function updateLibBadge() {
+  document.getElementById('lib-badge').textContent = library.length > 0 ? library.length : '';
+}
+
+function renderLibrary() {
+  const search = (document.getElementById('lib-search')?.value || '').toLowerCase();
+  const sort = document.getElementById('lib-sort')?.value || 'date-desc';
+  const list = document.getElementById('lib-list');
+
+  let filtered = library.filter(e => !search || e.title.toLowerCase().includes(search) || (e.company||'').toLowerCase().includes(search));
+
+  filtered.sort((a, b) => {
+    if (sort === 'date-asc') return a.id - b.id;
+    if (sort === 'title') return a.title.localeCompare(b.title);
+    if (sort === 'company') return (a.company||'').localeCompare(b.company||'');
+    if (sort === 'score') return (b.score||0) - (a.score||0);
+    return b.id - a.id;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">No saved results yet</div><div class="empty-sub">Generate and save results from the Resume Tailor tab</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => `
+    <div class="lib-entry">
+      <div class="lib-entry-header">
+        <div>
+          <div class="lib-entry-title">${e.title}${e.score ? `<span class="score-badge">${e.score}/100</span>` : ''}</div>
+          <div class="lib-entry-meta">
+            ${e.company ? `<span class="lib-tag">${e.company}</span>` : ''}
+            ${e.date} · ${e.time}
+          </div>
+        </div>
+        <div class="lib-entry-actions">
+          <button class="btn-ghost btn-sm" onclick="viewEntry(${e.id})">View</button>
+          <button class="btn-ghost btn-sm" onclick="copyEntry(${e.id})">Copy all</button>
+          <button class="btn-danger" onclick="deleteEntry(${e.id})">Delete</button>
+        </div>
+      </div>
+      <div class="lib-preview">${(e.summary||'').replace(/<[^>]+>/g,'').slice(0,200)}${(e.summary||'').length > 200 ? '…' : ''}</div>
+    </div>`).join('');
+}
+
+function viewEntry(id) {
+  const e = library.find(x => x.id === id); if (!e) return;
+  currentModalId = id;
+  document.getElementById('modal-title').textContent = e.title + (e.company ? ' — ' + e.company : '');
+  document.getElementById('modal-meta').textContent = (e.score ? 'Strength Score: ' + e.score + '/100  ·  ' : '') + e.date + ' · ' + e.time;
+
+  let body = '';
+  if (e.summary) body += `<div class="modal-section"><div class="modal-section-label">Professional Summary</div><div class="modal-content">${marked.parse(e.summary)}</div></div>`;
+  if (e.competencies) body += `<div class="modal-section"><div class="modal-section-label">Core Competencies</div><div class="modal-content">${marked.parse(e.competencies)}</div></div>`;
+  if (e.bullets) body += `<div class="modal-section"><div class="modal-section-label">Tailored Bullet Points</div><div class="modal-content">${marked.parse(e.bullets)}</div></div>`;
+  if (e.keywords) body += `<div class="modal-section"><div class="modal-section-label">Keywords Gap Analysis</div><div class="modal-content">${marked.parse(e.keywords)}</div></div>`;
+  if (e.cover) body += `<div class="modal-section"><div class="modal-section-label">Cover Letter</div><div class="modal-content">${marked.parse(e.cover)}</div></div>`;
+
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('view-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('view-modal').classList.remove('open'); }
+
+function printModal() { window.print(); }
+
+function copyEntry(id) {
+  const e = library.find(x => x.id === id); if (!e) return;
+  const text = [
+    e.title + (e.company ? ' — ' + e.company : ''),
+    e.date,
+    '\n--- PROFESSIONAL SUMMARY ---\n' + (e.summary||'').replace(/<[^>]+>/g,''),
+    '\n--- CORE COMPETENCIES ---\n' + (e.competencies||'').replace(/<[^>]+>/g,''),
+    '\n--- TAILORED BULLETS ---\n' + (e.bullets||'').replace(/<[^>]+>/g,''),
+    '\n--- KEYWORDS ANALYSIS ---\n' + (e.keywords||'').replace(/<[^>]+>/g,''),
+    e.cover ? '\n--- COVER LETTER ---\n' + e.cover.replace(/<[^>]+>/g,'') : ''
+  ].join('\n');
+  navigator.clipboard.writeText(text);
+  alert('All results copied to clipboard!');
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this saved result?')) return;
+  library = library.filter(e => e.id !== id);
+  saveLib(); updateLibBadge(); renderLibrary();
+}
+
+/* OPEN IN CLAUDE */
+function openInClaude() {
+  const title = document.getElementById('job-title').value.trim();
+  const company = document.getElementById('job-company').value.trim();
+  const history = document.getElementById('work-history').value.trim();
+  const duties = document.getElementById('job-duties').value.trim();
+  const quals = document.getElementById('job-quals').value.trim();
+  const wantCover = document.getElementById('addon-cover').checked;
+  if (!history) { alert('Please paste your work history first.'); return; }
+  const extras = wantCover ? ' Also generate a cover letter.' : '';
+  const prompt = `Please tailor my resume for the following role. Generate: tailored bullet points grouped by role, a professional summary, a ranked core competencies block (top 12, pipe-separated, ready to paste), a keywords gap analysis, and a candidate strength score out of 100 with breakdown across keyword match, experience alignment, qualifications coverage, and overall competitiveness.${extras}\n\nTARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nMY WORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+  window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
+}
+
+document.getElementById('view-modal').addEventListener('click', e => { if (e.target === document.getElementById('view-modal')) closeModal(); });
+
+loadSavedHistory();
+updateLibBadge();
+</script>
+</body>
+</html>
