@@ -175,6 +175,12 @@ select:focus { outline: none; border-color: #c9a96e; }
   #output-section { display: block !important; }
 }
 
+
+/* PILLS */
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; background: #1a160a; color: #c9a96e; border: 1px solid #2e2510; white-space: nowrap; }
+.pill-section-label { font-size: 10px; color: #6b6660; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 12px; margin-bottom: 6px; display: block; }
+
 @media(max-width:768px) {
   .two-col,.three-col,.four-col { grid-template-columns: 1fr; }
   .score-bars { grid-template-columns: 1fr; }
@@ -498,9 +504,9 @@ function renderOut(id, text) {
 }
 
 async function callClaude(system, user) {
-  const res = await fetch('/.netlify/functions/claude', {
+  const res = await fetch('/api/claude', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, system, messages: [{ role: 'user', content: user }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, system, messages: [{ role: 'user', content: user }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -528,6 +534,64 @@ function renderScore(scoreData) {
 }
 
 /* GENERATE */
+function resetOutputs() {
+  document.getElementById('output-section').style.display = 'none';
+  ['bullets-out','summary-out','competencies-out','keywords-out'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.innerHTML = ''; el.classList.add('placeholder'); }
+  });
+  document.getElementById('score-num').textContent = '--';
+  document.getElementById('score-label').textContent = 'Analyzing...';
+  document.getElementById('score-summary').textContent = 'Generating your strength assessment...';
+  ['kw','exp','qual','overall'].forEach(k => {
+    document.getElementById('fill-' + k).style.width = '0%';
+    document.getElementById('bar-' + k).textContent = '--%';
+  });
+  document.getElementById('addon-outputs').innerHTML = '';
+  lastOutputs = {};
+}
+
+function fullReset() {
+  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addon-cover').checked = false;
+  document.getElementById('chip-cover').classList.remove('selected');
+  document.getElementById('status-text').textContent = '';
+  resetOutputs();
+}
+
+function renderPills(text, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  
+  const lines = text.split('\n').filter(l => l.trim());
+  let html = '';
+  let currentGroup = [];
+  
+  lines.forEach(line => {
+    const clean = line.replace(/^[*•\-]\s*/, '').trim();
+    if (!clean) return;
+    
+    // If it looks like a section header (short, no special chars, often bold)
+    if (clean.startsWith('**') || clean.startsWith('#') || (clean.length < 40 && !clean.includes(':'))) {
+      if (currentGroup.length) {
+        html += '<div class="pill-group">' + currentGroup.map(p => '<span class="pill">' + p + '</span>').join('') + '</div>';
+        currentGroup = [];
+      }
+      const label = clean.replace(/\*\*/g, '').replace(/#/g, '').trim();
+      if (label) html += '<span class="pill-section-label">' + label + '</span>';
+    } else {
+      currentGroup.push(clean.replace(/\*\*/g, ''));
+    }
+  });
+  
+  if (currentGroup.length) {
+    html += '<div class="pill-group">' + currentGroup.map(p => '<span class="pill">' + p + '</span>').join('') + '</div>';
+  }
+  
+  el.innerHTML = html || marked.parse(text);
+  el.classList.remove('placeholder');
+}
+
 async function generateAll() {
   const title = document.getElementById('job-title').value.trim();
   const company = document.getElementById('job-company').value.trim();
@@ -564,32 +628,39 @@ async function generateAll() {
 
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
 
-  const promises = [
-    callClaude(system, `${ctx}\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Weight the most relevant roles more heavily based on the target job title. Keep each role to a maximum of 6-8 tight, impactful bullets — no padding, no repetition. Weave in quantifiable metrics. Use strong action verbs. No em dashes. Format as bullet points grouped by role with the role title as a bold header. Cover all three roles completely.`),
-
-    callClaude(system, `${ctx}\n\nTASK: Write a powerful 4-5 sentence professional summary positioning this candidate for the target role. Lead with years of experience and core expertise. Mirror language from both job duties AND qualifications. Include 2-3 specific metrics from the work history. Close with a confident statement about what this candidate brings. No first-person statements.`),
-
-    callClaude(system, `${ctx}\n\nTASK: Generate a tailored Core Competencies block for this specific role. Select the top 12 competencies ranked by relevance to this posting. Format them as a pipe-separated list ready to paste directly into a resume, like this:\nFull-Cycle Recruiting  |  Talent Acquisition  |  Workforce Planning  |  [etc]\n\nAfter the block, add a brief ranked list showing which 3 competencies are highest priority for this specific role and why.`),
-
-    callClaude(system, `${ctx}\n\nTASK: Perform a keyword gap analysis with three sections:\n\n**KEY KEYWORDS FROM THE POSTING** — most important terms ATS systems will scan for\n\n**COVERED IN RESUME** — which keywords already appear in the work history\n\n**GAPS TO ADDRESS** — missing keywords with a specific suggestion for how to incorporate each one naturally`),
-
-    callClaude(system, `${ctx}\n\nTASK: Score this candidate for this specific role. Return a JSON object with these exact fields:\n{\n  "overall": [0-100 integer],\n  "keyword_match": [0-100 integer],\n  "experience_alignment": [0-100 integer],\n  "qualifications_coverage": [0-100 integer],\n  "summary": "[2-3 sentence plain English assessment — what is strong, what the gaps are, and what score they could reach with the recommended additions. Be honest and specific.]"\n}\n\nReturn ONLY the JSON object, nothing else.`)
-  ];
-
   if (wantCover) promises.push(callClaude(system, `${ctx}\n\nTASK: Write a compelling cover letter for this role. 4 paragraphs: 1) Strong opening naming the role with the strongest qualification, 2) Most relevant experience with specific metrics, 3) What uniquely positions this candidate for this role, 4) Confident closing with a call to action. Professional but personable. No generic openings like "I am writing to apply."`));
 
   try {
-    const results = await Promise.all(promises);
-    lastOutputs = { title, company, bullets: results[0], summary: results[1], competencies: results[2], keywords: results[3], scoreRaw: results[4], cover: wantCover ? results[5] : null };
+    // Sequential calls to avoid timeout
+    document.getElementById('status-text').textContent = 'Generating bullets...';
+    const bullets = await callClaude(system, ctx + '\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Weight the most relevant roles based on the target job title. Keep each role to 6-8 tight impactful bullets. Weave in quantifiable metrics. Use strong action verbs. No em dashes. Format as bullet points grouped by role with the role title as a bold header. Cover all three roles completely.');
+    renderOut('bullets-out', bullets);
 
-    renderOut('bullets-out', results[0]);
-    renderOut('summary-out', results[1]);
-    renderOut('competencies-out', results[2]);
-    renderOut('keywords-out', results[3]);
-    const score = renderScore(results[4]);
-    lastOutputs.score = score;
-    if (wantCover && results[5]) renderOut('cover-out', results[5]);
+    document.getElementById('status-text').textContent = 'Generating summary...';
+    const summary = await callClaude(system, ctx + '\n\nTASK: Write a powerful 4-5 sentence professional summary positioning this candidate for the target role. Lead with years of experience and core expertise. Mirror language from both job duties AND qualifications. Include 2-3 specific metrics. Close with a confident statement. No first-person statements. No em dashes.');
+    renderOut('summary-out', summary);
+
+    document.getElementById('status-text').textContent = 'Building competencies block...';
+    const competencies = await callClaude(system, ctx + '\n\nTASK: Generate a tailored Core Competencies block. List exactly 12 competencies ranked by relevance to this posting. Return them as a simple list, one per line, no bullets, no headers, no extra text. Just the 12 competency phrases.');
+    renderPills(competencies, 'competencies-out');
+
+    document.getElementById('status-text').textContent = 'Running keywords analysis...';
+    const keywords = await callClaude(system, ctx + '\n\nTASK: Perform a concise keyword gap analysis with exactly three sections:\n\nSECTION 1: KEY KEYWORDS\nList the top 10 most important ATS keywords, one per line, no bullets\n\nSECTION 2: COVERED\nWhich of those keywords appear in the work history, one per line\n\nSECTION 3: GAPS TO ADDRESS\nTop 5 missing keywords with a one-sentence suggestion each');
+    renderOut('keywords-out', keywords);
+
+    document.getElementById('status-text').textContent = 'Calculating strength score...';
+    const scoreRaw = await callClaude(system, ctx + '\n\nTASK: Score this candidate for this role. Return ONLY a JSON object:\n{"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence honest assessment of strengths, gaps, and potential score with recommended additions"}');
+    const score = renderScore(scoreRaw);
+
+    if (wantCover) {
+      document.getElementById('status-text').textContent = 'Drafting cover letter...';
+      const cover = await callClaude(system, ctx + '\n\nTASK: Write a compelling cover letter. 4 paragraphs: strong opening naming the role, relevant experience with metrics, unique positioning, confident closing with call to action. Professional but human tone. No em dashes. No generic openings.');
+      renderOut('cover-out', cover);
+    }
+
+    lastOutputs = { title, company, bullets, summary, competencies, keywords, score, cover: wantCover ? document.getElementById('cover-out')?.innerText : null };
     document.getElementById('status-text').textContent = 'Done — review, copy, or save your results below.';
+
   } catch(err) {
     document.getElementById('bullets-out').textContent = 'Error connecting to AI: ' + err.message + '. Try the "Open in Claude" button instead.';
     document.getElementById('status-text').textContent = '';
@@ -608,15 +679,7 @@ function copyOut(id) {
 }
 
 /* CLEAR */
-function clearForm() {
-  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('addon-cover').checked = false;
-  document.getElementById('chip-cover').classList.remove('selected');
-  document.getElementById('addon-outputs').innerHTML = '';
-  document.getElementById('output-section').style.display = 'none';
-  document.getElementById('status-text').textContent = '';
-  lastOutputs = {};
-}
+function clearForm() { fullReset(); }
 
 /* SAVE TO LIBRARY */
 function saveToLibrary() {
