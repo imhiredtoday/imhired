@@ -305,15 +305,7 @@ select:focus { outline: none; border-color: #c9a96e; }
     </div>
 
     <!-- STEP 4 -->
-    <div class="card">
-      <span class="step-label">Step 4 — Optional Add-ons</span>
-      <span class="field-hint" style="margin-top:6px;display:block;">Bullets, summary, competencies, keywords, and strength score are always generated. Add extras:</span>
-      <div class="addons-row">
-        <label class="addon-chip" id="chip-cover" onclick="toggleChip('cover')">
-          <input type="checkbox" id="addon-cover"> <span class="addon-chip-label">Cover letter</span>
-        </label>
-      </div>
-    </div>
+
 
     <div class="btn-row">
       <button class="btn-primary" id="gen-btn" onclick="generateAll()">Generate ↗</button>
@@ -328,7 +320,7 @@ select:focus { outline: none; border-color: #c9a96e; }
     <div id="output-section" style="display:none;">
 
       <!-- SCORE -->
-      <div class="score-card" id="score-card">
+      <div class="score-card" id="score-card" style="display:none;">
         <div class="score-header">
           <div>
             <div class="score-title">Candidate Strength Score</div>
@@ -379,6 +371,17 @@ select:focus { outline: none; border-color: #c9a96e; }
       <div class="output-card" style="margin-bottom:14px;">
         <div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick="copyOut('keywords-out')">Copy</button></div>
         <div class="result-box placeholder" id="keywords-out">Keywords analysis will appear here...</div>
+      </div>
+
+      <div id="phase2-btns" style="display:none;margin-bottom:14px;">
+        <div class="output-card" style="padding:14px 18px;">
+          <div style="font-size:10px;color:#c9a96e;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Want more?</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-ghost" id="btn-cover" onclick="generatePhase2('cover')">Generate cover letter</button>
+            <button class="btn-ghost" id="btn-gap" onclick="generatePhase2('gap')">Generate gap analysis</button>
+            <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate strength score</button>
+          </div>
+        </div>
       </div>
 
       <div id="addon-outputs"></div>
@@ -598,10 +601,10 @@ async function generateAll() {
   const history = document.getElementById('work-history').value.trim();
   const duties = document.getElementById('job-duties').value.trim();
   const quals = document.getElementById('job-quals').value.trim();
-  const wantCover = document.getElementById('addon-cover').checked;
 
   if (!history) { alert('Please paste your work history in Step 2.'); return; }
   if (!duties && !quals) { alert('Please paste at least the job duties or qualifications in Step 3.'); return; }
+  const wantCover = false;
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true; btn.textContent = 'Generating...';
@@ -644,22 +647,9 @@ async function generateAll() {
     const competencies = await callClaude(system, ctx + '\n\nTASK: Generate a tailored Core Competencies block. List exactly 12 competencies ranked by relevance to this posting. Return them as a simple list, one per line, no bullets, no headers, no extra text. Just the 12 competency phrases.');
     renderPills(competencies, 'competencies-out');
 
-    document.getElementById('status-text').textContent = 'Running keywords analysis...';
-    const keywords = await callClaude(system, ctx + '\n\nTASK: Perform a concise keyword gap analysis with exactly three sections:\n\nSECTION 1: KEY KEYWORDS\nList the top 10 most important ATS keywords, one per line, no bullets\n\nSECTION 2: COVERED\nWhich of those keywords appear in the work history, one per line\n\nSECTION 3: GAPS TO ADDRESS\nTop 5 missing keywords with a one-sentence suggestion each');
-    renderOut('keywords-out', keywords);
-
-    document.getElementById('status-text').textContent = 'Calculating strength score...';
-    const scoreRaw = await callClaude(system, ctx + '\n\nTASK: Score this candidate for this role. Return ONLY a JSON object:\n{"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence honest assessment of strengths, gaps, and potential score with recommended additions"}');
-    const score = renderScore(scoreRaw);
-
-    if (wantCover) {
-      document.getElementById('status-text').textContent = 'Drafting cover letter...';
-      const cover = await callClaude(system, ctx + '\n\nTASK: Write a compelling cover letter. 4 paragraphs: strong opening naming the role, relevant experience with metrics, unique positioning, confident closing with call to action. Professional but human tone. No em dashes. No generic openings.');
-      renderOut('cover-out', cover);
-    }
-
-    lastOutputs = { title, company, bullets, summary, competencies, keywords, score, cover: wantCover ? document.getElementById('cover-out')?.innerText : null };
-    document.getElementById('status-text').textContent = 'Done — review, copy, or save your results below.';
+    lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
+    document.getElementById('status-text').textContent = 'Done — want more? Add cover letter, gap analysis, or strength score below.';
+    document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
     document.getElementById('bullets-out').textContent = 'Error connecting to AI: ' + err.message + '. Try the "Open in Claude" button instead.';
@@ -682,6 +672,61 @@ function copyOut(id) {
 function clearForm() { fullReset(); }
 
 /* SAVE TO LIBRARY */
+
+async function generatePhase2(type) {
+  const title = document.getElementById('job-title').value.trim();
+  const company = document.getElementById('job-company').value.trim();
+  const history = document.getElementById('work-history').value.trim();
+  const duties = document.getElementById('job-duties').value.trim();
+  const quals = document.getElementById('job-quals').value.trim();
+
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information. Never use em dashes in any output. Use plain punctuation only. Write in a confident, direct, professional but human tone. IMPORTANT: Never ask clarifying questions. Never request additional information. Work only with what is provided and execute the task completely. If information is incomplete, do your best with what exists. Do not acknowledge gaps or limitations in the input.`;
+
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+
+  const btn = document.getElementById('btn-' + (type === 'gap' ? 'gap' : type === 'score' ? 'score' : 'cover'));
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  const addonEl = document.getElementById('addon-outputs');
+
+  try {
+    if (type === 'cover') {
+      if (!document.getElementById('cover-out')) {
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick="copyOut('cover-out')">Copy</button></div><div class="result-box" id="cover-out"></div></div>`;
+      }
+      loading('cover-out', 'Drafting your cover letter...');
+      const cover = await callClaude(system, ctx + '\n\nTASK: Write a compelling cover letter. 4 paragraphs: strong opening naming the role, relevant experience with metrics, unique positioning, confident closing with call to action. Professional but human tone. No em dashes. No generic openings like I am writing to apply.');
+      renderOut('cover-out', cover);
+      lastOutputs.cover = cover;
+    }
+
+    if (type === 'gap') {
+      if (!document.getElementById('keywords-out2')) {
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick="copyOut('keywords-out2')">Copy</button></div><div class="result-box" id="keywords-out2"></div></div>`;
+      }
+      loading('keywords-out2', 'Running keywords gap analysis...');
+      const keywords = await callClaude(system, ctx + '\n\nTASK: Perform a concise keyword gap analysis with exactly three sections:\n\nSECTION 1: KEY KEYWORDS\nList the top 10 most important ATS keywords, one per line, no bullets\n\nSECTION 2: COVERED\nWhich of those keywords appear in the work history, one per line\n\nSECTION 3: GAPS TO ADDRESS\nTop 5 missing keywords with a one-sentence suggestion each');
+      renderOut('keywords-out2', keywords);
+      lastOutputs.keywords = keywords;
+    }
+
+    if (type === 'score') {
+      document.getElementById('score-card').style.display = 'block';
+      document.getElementById('score-summary').textContent = 'Calculating...';
+      const scoreRaw = await callClaude(system, ctx + '\n\nTASK: Score this candidate for this role. Return ONLY a JSON object:\n{"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence honest assessment of strengths, gaps, and potential score with recommended additions"}');
+      const score = renderScore(scoreRaw);
+      lastOutputs.score = score;
+    }
+
+  } catch(err) {
+    btn.textContent = 'Error — try again';
+  }
+
+  btn.disabled = false;
+  btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : 'Generate strength score';
+}
+
 function saveToLibrary() {
   if (!lastOutputs.bullets) { alert('Please generate results first.'); return; }
   const entry = {
@@ -801,7 +846,6 @@ function openInClaude() {
   const history = document.getElementById('work-history').value.trim();
   const duties = document.getElementById('job-duties').value.trim();
   const quals = document.getElementById('job-quals').value.trim();
-  const wantCover = document.getElementById('addon-cover').checked;
   if (!history) { alert('Please paste your work history first.'); return; }
   const extras = wantCover ? ' Also generate a cover letter.' : '';
   const prompt = `Please tailor my resume for the following role. Generate: tailored bullet points grouped by role, a professional summary, a ranked core competencies block (top 12, pipe-separated, ready to paste), a keywords gap analysis, and a candidate strength score out of 100 with breakdown across keyword match, experience alignment, qualifications coverage, and overall competitiveness.${extras}\n\nTARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nMY WORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
