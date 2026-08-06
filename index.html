@@ -539,6 +539,9 @@ function renderScore(scoreData) {
 /* GENERATE */
 function resetOutputs() {
   document.getElementById('output-section').style.display = 'none';
+  document.getElementById('phase2-btns').style.display = 'none';
+  document.getElementById('score-card').style.display = 'none';
+  document.getElementById('addon-outputs').innerHTML = '';
   ['bullets-out','summary-out','competencies-out','keywords-out'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.innerHTML = ''; el.classList.add('placeholder'); }
@@ -550,7 +553,14 @@ function resetOutputs() {
     document.getElementById('fill-' + k).style.width = '0%';
     document.getElementById('bar-' + k).textContent = '--%';
   });
-  document.getElementById('addon-outputs').innerHTML = '';
+  // Reset Phase 2 buttons
+  ['btn-cover','btn-gap','btn-score'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) { btn.disabled = false; }
+  });
+  document.getElementById('btn-cover') && (document.getElementById('btn-cover').textContent = 'Generate cover letter');
+  document.getElementById('btn-gap') && (document.getElementById('btn-gap').textContent = 'Generate gap analysis');
+  document.getElementById('btn-score') && (document.getElementById('btn-score').textContent = 'Generate strength score');
   lastOutputs = {};
 }
 
