@@ -2,8 +2,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABQSURBVFhH7c6xDYAgEATAs4T9l8QFxAXYhF1cQvzQQ2JiCN3LcbkHAAAAAAAAAAAAAAAAeDW7e87smLMrAAAAAAAAAAAAAAAAAAAAeN0PAAD//wMABjkD0gAAAABJRU5ErkJggg==">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I'm Hired — Tailored to Win</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -497,7 +500,7 @@ function renderOut(id, text) {
 async function callClaude(system, user) {
   const res = await fetch('/.netlify/functions/claude', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, system, messages: [{ role: 'user', content: user }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, system, messages: [{ role: 'user', content: user }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -562,7 +565,7 @@ async function generateAll() {
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
 
   const promises = [
-    callClaude(system, `${ctx}\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Weight the most relevant roles more heavily based on the target job title. Add and expand bullets where there are gaps — do not remove original content. Weave in all quantifiable metrics. Use strong action verbs. Format as bullet points grouped by role with the role title as a bold header.`),
+    callClaude(system, `${ctx}\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Weight the most relevant roles more heavily based on the target job title. Keep each role to a maximum of 6-8 tight, impactful bullets — no padding, no repetition. Weave in quantifiable metrics. Use strong action verbs. No em dashes. Format as bullet points grouped by role with the role title as a bold header. Cover all three roles completely.`),
 
     callClaude(system, `${ctx}\n\nTASK: Write a powerful 4-5 sentence professional summary positioning this candidate for the target role. Lead with years of experience and core expertise. Mirror language from both job duties AND qualifications. Include 2-3 specific metrics from the work history. Close with a confident statement about what this candidate brings. No first-person statements.`),
 
