@@ -368,10 +368,7 @@ select:focus { outline: none; border-color: #c9a96e; }
         <div class="result-box placeholder" id="competencies-out">Your tailored competencies block will appear here...</div>
       </div>
 
-      <div class="output-card" style="margin-bottom:14px;">
-        <div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick="copyOut('keywords-out')">Copy</button></div>
-        <div class="result-box placeholder" id="keywords-out">Keywords analysis will appear here...</div>
-      </div>
+
 
       <div id="phase2-btns" style="display:none;margin-bottom:14px;">
         <div class="output-card" style="padding:14px 18px;">
@@ -542,7 +539,7 @@ function resetOutputs() {
   document.getElementById('phase2-btns').style.display = 'none';
   document.getElementById('score-card').style.display = 'none';
   document.getElementById('addon-outputs').innerHTML = '';
-  ['bullets-out','summary-out','competencies-out','keywords-out'].forEach(id => {
+  ['bullets-out','summary-out','competencies-out'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.innerHTML = ''; el.classList.add('placeholder'); }
   });
