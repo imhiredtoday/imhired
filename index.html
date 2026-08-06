@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I'm Hired — Tailored to Win</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -496,7 +497,7 @@ function renderOut(id, text) {
 async function callClaude(system, user) {
   const res = await fetch('/.netlify/functions/claude', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system, messages: [{ role: 'user', content: user }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system, messages: [{ role: 'user', content: user }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -556,7 +557,7 @@ async function generateAll() {
     loading('cover-out', 'Drafting your cover letter...');
   }
 
-  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information.`;
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information. Never use em dashes (—) in any output. Use plain punctuation only — commas, periods, semicolons, and colons. Write in a confident, direct, professional but human tone.`;
 
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
 
@@ -632,8 +633,12 @@ function saveToLibrary() {
   };
   library.unshift(entry);
   saveLib(); updateLibBadge();
-  const btn = event.target; btn.textContent = 'Saved!';
-  setTimeout(() => btn.textContent = 'Save to library', 2000);
+  // Clear job fields for next application
+  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addon-cover').checked = false;
+  document.getElementById('chip-cover').classList.remove('selected');
+  const btn = event.target; btn.textContent = 'Saved! Fields cleared for next job.';
+  setTimeout(() => btn.textContent = 'Save to library', 3000);
 }
 
 /* LIBRARY */
