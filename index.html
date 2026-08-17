@@ -211,6 +211,7 @@ select:focus { outline: none; border-color: #c9a96e; }
 
 <script>
 const ACCESS_CODE = 'tailored2026';
+
 function checkCode() {
   const input = document.getElementById('gate-input').value.trim();
   if (input === ACCESS_CODE) {
@@ -222,11 +223,93 @@ function checkCode() {
     document.getElementById('gate-input').focus();
   }
 }
+
 if (sessionStorage.getItem('imhired_access') === 'granted') {
   document.addEventListener('DOMContentLoaded', function() {
     var gate = document.getElementById('access-gate');
     if (gate) gate.style.display = 'none';
   });
+}
+
+const titleMappings = {
+  'assistant director': ['Talent Acquisition Manager', 'HR Manager', 'Recruiting Manager', 'Staffing Manager', 'People Operations Manager', 'TA Lead'],
+  'staffing': ['Talent Acquisition Specialist', 'Recruiter', 'HR Specialist', 'Recruiting Specialist', 'TA Partner', 'Staffing Specialist'],
+  'management analyst': ['HR Business Partner', 'People Operations Specialist', 'HR Generalist', 'HR Consultant', 'Workforce Analyst', 'HR Analyst'],
+  'administrative officer': ['Administrative Manager', 'Operations Manager', 'HR Operations Manager', 'Office Manager', 'Administrative Director', 'Business Operations Manager'],
+  'recruiter': ['Talent Acquisition Specialist', 'TA Partner', 'Recruiting Coordinator', 'Corporate Recruiter', 'Senior Recruiter', 'Talent Sourcer'],
+  'hr': ['HR Business Partner', 'HR Generalist', 'People Operations', 'HR Specialist', 'HR Coordinator', 'HR Manager'],
+  'talent': ['Talent Acquisition Specialist', 'TA Manager', 'Talent Partner', 'Talent Sourcer', 'Recruiting Manager', 'Head of Talent'],
+  'workforce': ['Workforce Planning Analyst', 'HR Business Partner', 'People Analytics', 'Workforce Manager', 'Talent Strategy Manager'],
+};
+
+function suggestTitles() {
+  const input = document.getElementById('job-title').value.trim().toLowerCase();
+  if (input.length < 3) { clearTitleSuggestions(); return; }
+  let suggestions = [];
+  for (const [key, titles] of Object.entries(titleMappings)) {
+    if (input.includes(key) || key.includes(input)) {
+      suggestions = [...new Set([...suggestions, ...titles])];
+    }
+  }
+  if (!suggestions.length) { clearTitleSuggestions(); return; }
+  const box = document.getElementById('title-suggestions');
+  box.style.display = 'block';
+  box.innerHTML = '<div class="title-match-box"><span class="title-match-label">Suggested private sector title matches - click to use</span><div class="title-chips">' +
+    suggestions.slice(0, 6).map(t => '<div class="title-chip" onclick="selectTitle('' + t + '')">' + t + '</div>').join('') +
+    '</div><div class="title-match-note">These titles may improve ATS matching for private sector applications.</div></div>';
+}
+
+function selectTitle(title) {
+  document.getElementById('job-title').value = title;
+  document.querySelectorAll('.title-chip').forEach(c => c.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+function clearTitleSuggestions() {
+  const box = document.getElementById('title-suggestions');
+  if (box) box.style.display = 'none';
+}
+
+function generateAll() {
+  document.dispatchEvent(new CustomEvent('generateAll'));
+}
+
+function fullReset() {
+  document.dispatchEvent(new CustomEvent('fullReset'));
+}
+
+function clearForm() {
+  document.dispatchEvent(new CustomEvent('fullReset'));
+}
+
+function saveToLibrary() {
+  document.dispatchEvent(new CustomEvent('saveToLibrary'));
+}
+
+function openInClaude() {
+  document.dispatchEvent(new CustomEvent('openInClaude'));
+}
+
+function generatePhase2(type) {
+  document.dispatchEvent(new CustomEvent('generatePhase2', {detail: type}));
+}
+
+function copyOut(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {});
+}
+
+function switchTab(tab, el) {
+  document.dispatchEvent(new CustomEvent('switchTab', {detail: {tab, el}}));
+}
+
+function saveHistory() {
+  document.dispatchEvent(new CustomEvent('saveHistory'));
+}
+
+function clearHistory() {
+  document.dispatchEvent(new CustomEvent('clearHistory'));
 }
 </script>
 <div class="gate" id="access-gate">
@@ -497,7 +580,7 @@ function updateClock() {
 updateClock(); setInterval(updateClock, 1000);
 
 /* TABS */
-function switchTab(tab, el) {
+function _switchTab(tab, el) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + tab).classList.add('active');
@@ -514,7 +597,7 @@ function loadSavedHistory() {
   }
 }
 
-function saveHistory() {
+function _saveHistory() {
   const val = document.getElementById('work-history').value.trim();
   if (!val) { alert('Please paste your work history first.'); return; }
   localStorage.setItem(LS_HISTORY, val);
@@ -524,7 +607,7 @@ function saveHistory() {
   setTimeout(() => btn.textContent = 'Save history', 2000);
 }
 
-function clearHistory() {
+function _clearHistory() {
   if (!confirm('Clear your saved work history?')) return;
   localStorage.removeItem(LS_HISTORY);
   document.getElementById('work-history').value = '';
@@ -608,7 +691,7 @@ function resetOutputs() {
   lastOutputs = {};
 }
 
-function fullReset() {
+function _fullReset() {
   ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('addon-cover').checked = false;
   document.getElementById('chip-cover').classList.remove('selected');
@@ -649,7 +732,7 @@ function renderPills(text, containerId) {
   el.classList.remove('placeholder');
 }
 
-async function generateAll() {
+async function _generateAll() {
   const title = document.getElementById('job-title').value.trim();
   const company = document.getElementById('job-company').value.trim();
   const history = document.getElementById('work-history').value.trim();
@@ -735,7 +818,7 @@ function clearForm() { fullReset(); }
 
 /* SAVE TO LIBRARY */
 
-async function generatePhase2(type) {
+async function _generatePhase2(type) {
   const title = document.getElementById('job-title').value.trim();
   const company = document.getElementById('job-company').value.trim();
   const history = document.getElementById('work-history').value.trim();
@@ -789,7 +872,7 @@ async function generatePhase2(type) {
   btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : 'Generate strength score';
 }
 
-function saveToLibrary() {
+function _saveToLibrary() {
   if (!lastOutputs.bullets) { alert('Please generate results first.'); return; }
   const entry = {
     id: Date.now(),
@@ -902,7 +985,7 @@ function deleteEntry(id) {
 }
 
 /* OPEN IN CLAUDE */
-function openInClaude() {
+function _openInClaude() {
   const title = document.getElementById('job-title').value.trim();
   const company = document.getElementById('job-company').value.trim();
   const history = document.getElementById('work-history').value.trim();
@@ -981,6 +1064,16 @@ function clearTitleSuggestions() {
 
 loadSavedHistory();
 updateLibBadge();
+
+// Wire up early-defined stubs to actual implementations
+document.addEventListener('generateAll', () => _generateAll());
+document.addEventListener('fullReset', () => _fullReset());
+document.addEventListener('saveToLibrary', () => _saveToLibrary());
+document.addEventListener('openInClaude', () => _openInClaude());
+document.addEventListener('generatePhase2', (e) => _generatePhase2(e.detail));
+document.addEventListener('switchTab', (e) => _switchTab(e.detail.tab, e.detail.el));
+document.addEventListener('saveHistory', () => _saveHistory());
+document.addEventListener('clearHistory', () => _clearHistory());
 </script>
 </body>
 </html>
