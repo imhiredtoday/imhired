@@ -303,8 +303,7 @@ function checkCode() {
       <div class="two-col">
         <div>
           <label class="field-label">Job title *</label>
-          <input type="text" id="job-title" placeholder="e.g. Talent Acquisition Specialist, Administrative Officer GS-13" oninput="suggestTitles()">
-          <div id="title-suggestions" style="display:none;margin-top:8px;"></div>
+          <input type="text" id="job-title" placeholder="e.g. Talent Acquisition Specialist, Administrative Officer GS-13">
         </div>
         <div>
           <label class="field-label">Company / Agency (optional)</label>
@@ -912,64 +911,11 @@ document.getElementById('view-modal').addEventListener('click', e => { if (e.tar
 
 
 
-/* TITLE MATCH */
-.title-match-box { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px 14px; }
-.title-match-label { font-size: 10px; color: #6b6660; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
-.title-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.title-chip { background: #1a160a; border: 1px solid #2e2510; border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #c9a96e; cursor: pointer; transition: all 0.15s; }
-.title-chip:hover { background: #2a2010; border-color: #c9a96e; }
-.title-chip.selected { background: #c9a96e; color: #0d0d0d; border-color: #c9a96e; }
-.title-match-note { font-size: 11px; color: #444; margin-top: 8px; }
+
 
 
 /* TITLE MATCH */
-const titleMappings = {
-  // HR / TA titles
-  'assistant director': ['Talent Acquisition Manager', 'HR Manager', 'Recruiting Manager', 'Staffing Manager', 'People Operations Manager', 'TA Lead'],
-  'staffing': ['Talent Acquisition Specialist', 'Recruiter', 'HR Specialist', 'Recruiting Specialist', 'TA Partner', 'Staffing Specialist'],
-  'management analyst': ['HR Business Partner', 'People Operations Specialist', 'HR Generalist', 'HR Consultant', 'Workforce Analyst', 'HR Analyst'],
-  'administrative officer': ['Administrative Manager', 'Operations Manager', 'HR Operations Manager', 'Office Manager', 'Administrative Director', 'Business Operations Manager'],
-  'recruiter': ['Talent Acquisition Specialist', 'TA Partner', 'Recruiting Coordinator', 'Corporate Recruiter', 'Senior Recruiter', 'Talent Sourcer'],
-  'hr': ['HR Business Partner', 'HR Generalist', 'People Operations', 'HR Specialist', 'HR Coordinator', 'HR Manager'],
-  'talent': ['Talent Acquisition Specialist', 'TA Manager', 'Talent Partner', 'Talent Sourcer', 'Recruiting Manager', 'Head of Talent'],
-  'workforce': ['Workforce Planning Analyst', 'HR Business Partner', 'People Analytics', 'Workforce Manager', 'Talent Strategy Manager'],
-};
 
-function suggestTitles() {
-  const input = document.getElementById('job-title').value.trim().toLowerCase();
-  if (input.length < 3) { clearTitleSuggestions(); return; }
-  
-  let suggestions = [];
-  for (const [key, titles] of Object.entries(titleMappings)) {
-    if (input.includes(key) || key.includes(input)) {
-      suggestions = [...new Set([...suggestions, ...titles])];
-    }
-  }
-  
-  if (!suggestions.length) { clearTitleSuggestions(); return; }
-  
-  const box = document.getElementById('title-suggestions');
-  box.style.display = 'block';
-  box.innerHTML = `
-    <div class="title-match-box">
-      <span class="title-match-label">Suggested private sector title matches - click to use</span>
-      <div class="title-chips">
-        ${suggestions.slice(0, 6).map(t => `<div class="title-chip" onclick="selectTitle('${t}')">${t}</div>`).join('')}
-      </div>
-      <div class="title-match-note">These titles may improve ATS matching for private sector applications.</div>
-    </div>`;
-}
-
-function selectTitle(title) {
-  document.getElementById('job-title').value = title;
-  document.querySelectorAll('.title-chip').forEach(c => c.classList.remove('selected'));
-  event.target.classList.add('selected');
-}
-
-function clearTitleSuggestions() {
-  const box = document.getElementById('title-suggestions');
-  if (box) box.style.display = 'none';
-}
 
 /* GATE JS MOVED */
 
