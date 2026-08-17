@@ -5,7 +5,7 @@
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABQSURBVFhH7c6xDYAgEATAs4T9l8QFxAXYhF1cQvzQQ2JiCN3LcbkHAAAAAAAAAAAAAAAAeDW7e87smLMrAAAAAAAAAAAAAAAAAAAAeN0PAAD//wMABjkD0gAAAABJRU5ErkJggg==">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I'm Hired — Tailored to Hire</title>
+<title>I'm Hired - Tailored to Hire</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -222,7 +222,7 @@ select:focus { outline: none; border-color: #c9a96e; }
 
 <div class="ticker">
   <span class="ticker-inner">
-    I'm Hired — Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp; I'm Hired — Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp;
+    I'm Hired - Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp; I'm Hired - Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp;
   </span>
 </div>
 
@@ -285,11 +285,12 @@ select:focus { outline: none; border-color: #c9a96e; }
 
     <!-- STEP 1 -->
     <div class="card">
-      <span class="step-label">Step 1 — Target Role</span>
+      <span class="step-label">Step 1 - Target Role</span>
       <div class="two-col">
         <div>
           <label class="field-label">Job title *</label>
-          <input type="text" id="job-title" placeholder="e.g. Talent Acquisition Specialist, Administrative Officer GS-13">
+          <input type="text" id="job-title" placeholder="e.g. Talent Acquisition Specialist, Administrative Officer GS-13" oninput="suggestTitles()">
+          <div id="title-suggestions" style="display:none;margin-top:8px;"></div>
         </div>
         <div>
           <label class="field-label">Company / Agency (optional)</label>
@@ -301,7 +302,7 @@ select:focus { outline: none; border-color: #c9a96e; }
     <!-- STEP 2 -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
-        <span class="step-label">Step 2 — Your Work History</span>
+        <span class="step-label">Step 2 - Your Work History</span>
         <div style="display:flex;gap:8px;align-items:center;">
           <span class="saved-badge" id="saved-badge" style="display:none;">✓ Saved</span>
           <button class="btn-ghost btn-sm" onclick="saveHistory()">Save history</button>
@@ -309,13 +310,13 @@ select:focus { outline: none; border-color: #c9a96e; }
         </div>
       </div>
       <label class="field-label" style="margin-top:8px;">Paste your full resume or work history</label>
-      <span class="field-hint">Include all roles, bullets, dates, and metrics. Click Save to store it — paste once, use forever.</span>
-      <textarea class="ta-lg" id="work-history" placeholder="Paste your full work history here — all roles, all bullets, dates, and metrics..."></textarea>
+      <span class="field-hint">Include all roles, bullets, dates, and metrics. Click Save to store it - paste once, use forever.</span>
+      <textarea class="ta-lg" id="work-history" placeholder="Paste your full work history here - all roles, all bullets, dates, and metrics..."></textarea>
     </div>
 
     <!-- STEP 3 -->
     <div class="card">
-      <span class="step-label">Step 3 — Job Details</span>
+      <span class="step-label">Step 3 - Job Details</span>
       <div class="two-col" style="margin-top:8px;">
         <div>
           <label class="field-label">Job duties & responsibilities</label>
@@ -324,7 +325,7 @@ select:focus { outline: none; border-color: #c9a96e; }
         </div>
         <div>
           <label class="field-label">Required qualifications</label>
-          <span class="field-hint">What they're screening for — skills, experience, requirements.</span>
+          <span class="field-hint">What they're screening for - skills, experience, requirements.</span>
           <textarea class="ta-md" id="job-quals" placeholder="Paste the qualifications and what they're seeking in a candidate..."></textarea>
         </div>
       </div>
@@ -390,7 +391,7 @@ select:focus { outline: none; border-color: #c9a96e; }
       </div>
 
       <div class="output-card" style="margin-bottom:14px;">
-        <div class="output-label">Core competencies block <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">— paste directly below your summary</span> <button class="btn-ghost btn-sm" onclick="copyOut('competencies-out')">Copy</button></div>
+        <div class="output-label">Core competencies block <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">- paste directly below your summary</span> <button class="btn-ghost btn-sm" onclick="copyOut('competencies-out')">Copy</button></div>
         <div class="result-box placeholder" id="competencies-out">Your tailored competencies block will appear here...</div>
       </div>
 
@@ -660,7 +661,7 @@ async function generateAll() {
     loading('cover-out', 'Drafting your cover letter...');
   }
 
-  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information. Never use em dashes in any output. Use plain punctuation only. Write in a confident, direct, professional but human tone. IMPORTANT: Never ask clarifying questions. Never request additional information. Work only with what is provided and execute the task completely. If information is incomplete, do your best with what exists. Do not acknowledge gaps or limitations in the input.`;
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience in federal and private sector talent acquisition. Your job is to present the candidate's experience at its absolute highest value without fabricating anything. Follow these principles precisely: 1) REFRAME ACTIVITY AS IMPACT - never say what someone did, say what they achieved or drove. 'Managed recruitment' becomes 'Directed end-to-end talent acquisition strategy.' 2) MIRROR THE POSTING'S EXACT VOCABULARY - use the posting's specific phrases and terminology to describe the candidate's real experience. 3) ADD ORGANIZATIONAL CONTEXT that is implied but unstated - scope, complexity, environment, stakes. 4) ELEVATE LANGUAGE to match the seniority and sophistication of the target role. 5) QUANTIFY WITH RANGES when exact numbers exist in the history - use them precisely. When context implies scale, reflect it. 6) LEAD WITH THE STRONGEST CREDENTIAL first in every bullet. 7) Never use em dashes. Use plain punctuation only. 8) Never ask clarifying questions or request more information. Work with what is provided and execute completely. Never acknowledge gaps. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate metrics, titles, tools, or responsibilities that do not exist in the work history.`;
 
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
 
@@ -689,7 +690,7 @@ if (compEl) {
 }
 
     lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
-    document.getElementById('status-text').textContent = 'Done — want more? Add cover letter, gap analysis, or strength score below.';
+    document.getElementById('status-text').textContent = 'Done - want more? Add cover letter, gap analysis, or strength score below.';
     document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
@@ -721,7 +722,7 @@ async function generatePhase2(type) {
   const duties = document.getElementById('job-duties').value.trim();
   const quals = document.getElementById('job-quals').value.trim();
 
-  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. Use strong action verbs, weave in quantifiable metrics from the work history where they exist, and mirror the language of the posting precisely. For federal roles keep government terminology; for private sector translate it. Never add fictional information. Never use em dashes in any output. Use plain punctuation only. Write in a confident, direct, professional but human tone. IMPORTANT: Never ask clarifying questions. Never request additional information. Work only with what is provided and execute the task completely. If information is incomplete, do your best with what exists. Do not acknowledge gaps or limitations in the input.`;
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience in federal and private sector talent acquisition. Your job is to present the candidate's experience at its absolute highest value without fabricating anything. Follow these principles precisely: 1) REFRAME ACTIVITY AS IMPACT - never say what someone did, say what they achieved or drove. 'Managed recruitment' becomes 'Directed end-to-end talent acquisition strategy.' 2) MIRROR THE POSTING'S EXACT VOCABULARY - use the posting's specific phrases and terminology to describe the candidate's real experience. 3) ADD ORGANIZATIONAL CONTEXT that is implied but unstated - scope, complexity, environment, stakes. 4) ELEVATE LANGUAGE to match the seniority and sophistication of the target role. 5) QUANTIFY WITH RANGES when exact numbers exist in the history - use them precisely. When context implies scale, reflect it. 6) LEAD WITH THE STRONGEST CREDENTIAL first in every bullet. 7) Never use em dashes. Use plain punctuation only. 8) Never ask clarifying questions or request more information. Work with what is provided and execute completely. Never acknowledge gaps. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate metrics, titles, tools, or responsibilities that do not exist in the work history.`;
 
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
 
@@ -761,7 +762,7 @@ async function generatePhase2(type) {
     }
 
   } catch(err) {
-    btn.textContent = 'Error — try again';
+    btn.textContent = 'Error - try again';
   }
 
   btn.disabled = false;
@@ -841,7 +842,7 @@ function renderLibrary() {
 function viewEntry(id) {
   const e = library.find(x => x.id === id); if (!e) return;
   currentModalId = id;
-  document.getElementById('modal-title').textContent = e.title + (e.company ? ' — ' + e.company : '');
+  document.getElementById('modal-title').textContent = e.title + (e.company ? ' - ' + e.company : '');
   document.getElementById('modal-meta').textContent = (e.score ? 'Strength Score: ' + e.score + '/100  ·  ' : '') + e.date + ' · ' + e.time;
 
   let body = '';
@@ -862,7 +863,7 @@ function printModal() { window.print(); }
 function copyEntry(id) {
   const e = library.find(x => x.id === id); if (!e) return;
   const text = [
-    e.title + (e.company ? ' — ' + e.company : ''),
+    e.title + (e.company ? ' - ' + e.company : ''),
     e.date,
     '\n--- PROFESSIONAL SUMMARY ---\n' + (e.summary||'').replace(/<[^>]+>/g,''),
     '\n--- CORE COMPETENCIES ---\n' + (e.competencies||'').replace(/<[^>]+>/g,''),
@@ -895,6 +896,66 @@ function openInClaude() {
 
 document.getElementById('view-modal').addEventListener('click', e => { if (e.target === document.getElementById('view-modal')) closeModal(); });
 
+
+
+/* TITLE MATCH */
+.title-match-box { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px 14px; }
+.title-match-label { font-size: 10px; color: #6b6660; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+.title-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.title-chip { background: #1a160a; border: 1px solid #2e2510; border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #c9a96e; cursor: pointer; transition: all 0.15s; }
+.title-chip:hover { background: #2a2010; border-color: #c9a96e; }
+.title-chip.selected { background: #c9a96e; color: #0d0d0d; border-color: #c9a96e; }
+.title-match-note { font-size: 11px; color: #444; margin-top: 8px; }
+
+
+/* TITLE MATCH */
+const titleMappings = {
+  // HR / TA titles
+  'assistant director': ['Talent Acquisition Manager', 'HR Manager', 'Recruiting Manager', 'Staffing Manager', 'People Operations Manager', 'TA Lead'],
+  'staffing': ['Talent Acquisition Specialist', 'Recruiter', 'HR Specialist', 'Recruiting Specialist', 'TA Partner', 'Staffing Specialist'],
+  'management analyst': ['HR Business Partner', 'People Operations Specialist', 'HR Generalist', 'HR Consultant', 'Workforce Analyst', 'HR Analyst'],
+  'administrative officer': ['Administrative Manager', 'Operations Manager', 'HR Operations Manager', 'Office Manager', 'Administrative Director', 'Business Operations Manager'],
+  'recruiter': ['Talent Acquisition Specialist', 'TA Partner', 'Recruiting Coordinator', 'Corporate Recruiter', 'Senior Recruiter', 'Talent Sourcer'],
+  'hr': ['HR Business Partner', 'HR Generalist', 'People Operations', 'HR Specialist', 'HR Coordinator', 'HR Manager'],
+  'talent': ['Talent Acquisition Specialist', 'TA Manager', 'Talent Partner', 'Talent Sourcer', 'Recruiting Manager', 'Head of Talent'],
+  'workforce': ['Workforce Planning Analyst', 'HR Business Partner', 'People Analytics', 'Workforce Manager', 'Talent Strategy Manager'],
+};
+
+function suggestTitles() {
+  const input = document.getElementById('job-title').value.trim().toLowerCase();
+  if (input.length < 3) { clearTitleSuggestions(); return; }
+  
+  let suggestions = [];
+  for (const [key, titles] of Object.entries(titleMappings)) {
+    if (input.includes(key) || key.includes(input)) {
+      suggestions = [...new Set([...suggestions, ...titles])];
+    }
+  }
+  
+  if (!suggestions.length) { clearTitleSuggestions(); return; }
+  
+  const box = document.getElementById('title-suggestions');
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div class="title-match-box">
+      <span class="title-match-label">Suggested private sector title matches - click to use</span>
+      <div class="title-chips">
+        ${suggestions.slice(0, 6).map(t => `<div class="title-chip" onclick="selectTitle('${t}')">${t}</div>`).join('')}
+      </div>
+      <div class="title-match-note">These titles may improve ATS matching for private sector applications.</div>
+    </div>`;
+}
+
+function selectTitle(title) {
+  document.getElementById('job-title').value = title;
+  document.querySelectorAll('.title-chip').forEach(c => c.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+function clearTitleSuggestions() {
+  const box = document.getElementById('title-suggestions');
+  if (box) box.style.display = 'none';
+}
 
 /* ACCESS GATE */
 const ACCESS_CODE = 'tailored2026';
