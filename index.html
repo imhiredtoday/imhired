@@ -5,7 +5,7 @@
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABQSURBVFhH7c6xDYAgEATAs4T9l8QFxAXYhF1cQvzQQ2JiCN3LcbkHAAAAAAAAAAAAAAAAeDW7e87smLMrAAAAAAAAAAAAAAAAAAAAeN0PAAD//wMABjkD0gAAAABJRU5ErkJggg==">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I'm Hired — Tailored to Win</title>
+<title>I'm Hired — Tailored to Hire</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c9a96e'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='14' fill='%230d0d0d'>IH</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -212,7 +212,7 @@ select:focus { outline: none; border-color: #c9a96e; }
 <div class="gate" id="access-gate">
   <div class="gate-box">
     <div class="gate-title">I'm <span>Hired</span></div>
-    <div class="gate-tagline">Tailored to Win</div>
+    <div class="gate-tagline">Tailored to Hire</div>
     <label class="gate-label">Enter access code</label>
     <input type="password" class="gate-input" id="gate-input" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkCode()">
     <button class="gate-btn" onclick="checkCode()">Enter</button>
@@ -222,7 +222,7 @@ select:focus { outline: none; border-color: #c9a96e; }
 
 <div class="ticker">
   <span class="ticker-inner">
-    I'm Hired — Tailored to Win &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp; I'm Hired — Tailored to Win &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp;
+    I'm Hired — Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp; I'm Hired — Tailored to Hire &nbsp;·&nbsp; Your experience is your edge &nbsp;·&nbsp; Speak their language. Get the interview. &nbsp;·&nbsp; Every application is an opportunity &nbsp;·&nbsp; Tailor it. Submit it. Own it. &nbsp;·&nbsp; Your next role is closer than you think &nbsp;·&nbsp;
   </span>
 </div>
 
@@ -262,7 +262,7 @@ select:focus { outline: none; border-color: #c9a96e; }
     <div class="hero-left">
       <div class="hero-eyebrow">Career Command Center</div>
       <div class="hero-title">I'm <span>Hired</span></div>
-      <div class="hero-tagline">Tailored to Win</div>
+      <div class="hero-tagline">Tailored to Hire</div>
     </div>
     <div class="hero-right">
       <div class="hero-time" id="live-time">--:-- --</div>
@@ -678,7 +678,15 @@ async function generateAll() {
 
     document.getElementById('status-text').textContent = 'Building competencies block...';
     const competencies = await callClaude(system, ctx + '\n\nTASK: Generate a tailored Core Competencies block. List exactly 12 competencies ranked by relevance to this posting. Return them as a simple list, one per line, no bullets, no headers, no extra text. Just the 12 competency phrases.');
-    renderPills(competencies, 'competencies-out');
+    // Render competencies as clean pipe-separated text
+const compLines = competencies.split('\n').filter(l => l.trim() && !l.includes('**') && !l.includes('#'));
+const compClean = compLines.map(l => l.replace(/^[*•\-]\s*/, '').trim()).filter(l => l.length > 2 && l.length < 60);
+const compText = compClean.slice(0, 12).join('  |  ');
+const compEl = document.getElementById('competencies-out');
+if (compEl) {
+  compEl.innerHTML = '<p style="font-size:13px;color:#c8c4be;line-height:2;letter-spacing:0.02em;">' + compText + '</p>';
+  compEl.classList.remove('placeholder');
+}
 
     lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
     document.getElementById('status-text').textContent = 'Done — want more? Add cover letter, gap analysis, or strength score below.';
