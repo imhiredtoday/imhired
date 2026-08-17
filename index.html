@@ -209,6 +209,26 @@ select:focus { outline: none; border-color: #c9a96e; }
 <body>
 
 
+<script>
+const ACCESS_CODE = 'tailored2026';
+function checkCode() {
+  const input = document.getElementById('gate-input').value.trim();
+  if (input === ACCESS_CODE) {
+    document.getElementById('access-gate').style.display = 'none';
+    sessionStorage.setItem('imhired_access', 'granted');
+  } else {
+    document.getElementById('gate-error').style.display = 'block';
+    document.getElementById('gate-input').value = '';
+    document.getElementById('gate-input').focus();
+  }
+}
+if (sessionStorage.getItem('imhired_access') === 'granted') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var gate = document.getElementById('access-gate');
+    if (gate) gate.style.display = 'none';
+  });
+}
+</script>
 <div class="gate" id="access-gate">
   <div class="gate-box">
     <div class="gate-title">I'm <span>Hired</span></div>
@@ -957,25 +977,7 @@ function clearTitleSuggestions() {
   if (box) box.style.display = 'none';
 }
 
-/* ACCESS GATE */
-const ACCESS_CODE = 'tailored2026';
-
-function checkCode() {
-  const input = document.getElementById('gate-input').value.trim();
-  if (input === ACCESS_CODE) {
-    document.getElementById('access-gate').style.display = 'none';
-    sessionStorage.setItem('imhired_access', 'granted');
-  } else {
-    document.getElementById('gate-error').style.display = 'block';
-    document.getElementById('gate-input').value = '';
-    document.getElementById('gate-input').focus();
-  }
-}
-
-// Check if already granted this session
-if (sessionStorage.getItem('imhired_access') === 'granted') {
-  document.getElementById('access-gate').style.display = 'none';
-}
+/* GATE JS MOVED */
 
 loadSavedHistory();
 updateLibBadge();
