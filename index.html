@@ -417,6 +417,7 @@ function checkCode() {
             <button class="btn-ghost" id="btn-cover" onclick="generatePhase2('cover')">Generate cover letter</button>
             <button class="btn-ghost" id="btn-gap" onclick="generatePhase2('gap')">Generate gap analysis</button>
             <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate strength score</button>
+            <button class="btn-ghost" id="btn-title" onclick="generatePhase2('title')">Suggest job title alignment</button>
           </div>
         </div>
       </div>
@@ -591,13 +592,14 @@ function resetOutputs() {
     document.getElementById('bar-' + k).textContent = '--%';
   });
   // Reset Phase 2 buttons
-  ['btn-cover','btn-gap','btn-score'].forEach(id => {
+  ['btn-cover','btn-gap','btn-score','btn-title'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) { btn.disabled = false; }
   });
   document.getElementById('btn-cover') && (document.getElementById('btn-cover').textContent = 'Generate cover letter');
   document.getElementById('btn-gap') && (document.getElementById('btn-gap').textContent = 'Generate gap analysis');
   document.getElementById('btn-score') && (document.getElementById('btn-score').textContent = 'Generate strength score');
+  document.getElementById('btn-title') && (document.getElementById('btn-title').textContent = 'Suggest job title alignment');
   lastOutputs = {};
 }
 
@@ -774,12 +776,21 @@ async function generatePhase2(type) {
       lastOutputs.score = score;
     }
 
+    if (type === 'title') {
+      if (!document.getElementById('title-align-out')) {
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Job title alignment <button class="btn-ghost btn-sm" onclick="copyOut('title-align-out')">Copy</button></div><div class="result-box" id="title-align-out"></div></div>`;
+      }
+      loading('title-align-out', 'Analyzing title alignment...');
+      const titleAlign = await callClaude(system, ctx + '\n\nTASK: Analyze how the titles in this work history align with the target job title. Do the following:\n\n1. LIST WORK HISTORY TITLES - identify each job title from the work history\n2. TARGET ROLE PERCEPTION - explain how a private sector hiring manager or recruiter would perceive those titles when reviewing this application for the target role\n3. ALIGNMENT GAPS - identify any gaps between how the titles read and what the target role expects\n4. SUGGESTED POSITIONING - for each title, suggest how to reframe or position it for this specific role. If any titles are federal government titles, provide the private sector equivalent. If titles are already private sector, suggest how to position them more competitively.\n5. LINKEDIN AND NETWORKING HEADLINE - suggest a headline the candidate could use that bridges their background to this target role.\n\nBe specific, direct, and actionable. No em dashes.');
+      renderOut('title-align-out', titleAlign);
+    }
+
   } catch(err) {
     btn.textContent = 'Error - try again';
   }
 
   btn.disabled = false;
-  btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : 'Generate strength score';
+  btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : type === 'score' ? 'Generate strength score' : 'Suggest job title alignment';
 }
 
 function saveToLibrary() {
