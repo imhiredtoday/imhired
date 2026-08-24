@@ -310,6 +310,14 @@ function checkCode() {
           <input type="text" id="job-company" placeholder="e.g. Amazon, NIH, Deloitte">
         </div>
       </div>
+      <div style="margin-top:12px;">
+        <label class="field-label">Application type</label>
+        <div class="role-type-toggle">
+          <button class="role-type-btn active" id="rtype-private" onclick="setRoleType('private')">Private sector</button>
+          <button class="role-type-btn" id="rtype-contractor" onclick="setRoleType('contractor')">Federal contractor</button>
+          <button class="role-type-btn" id="rtype-federal" onclick="setRoleType('federal')">Federal government</button>
+        </div>
+      </div>
     </div>
 
     <!-- STEP 2 -->
@@ -605,6 +613,7 @@ function resetOutputs() {
 
 function fullReset() {
   ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  setRoleType('private');
   document.getElementById('addon-cover').checked = false;
   document.getElementById('chip-cover').classList.remove('selected');
   document.getElementById('status-text').textContent = '';
@@ -644,6 +653,26 @@ function renderPills(text, containerId) {
   el.classList.remove('placeholder');
 }
 
+
+let currentRoleType = 'private';
+
+function setRoleType(type) {
+  currentRoleType = type;
+  ['private','contractor','federal'].forEach(t => {
+    document.getElementById('rtype-' + t).classList.toggle('active', t === type);
+  });
+}
+
+function getRoleTypeInstruction() {
+  if (currentRoleType === 'federal') {
+    return 'TERMINOLOGY: This is a federal government application. Keep all federal government terminology exactly as it appears in the work history. Use OPM language, series codes, GS grades, federal agency names, and government-specific terms verbatim. Do not translate anything.';
+  } else if (currentRoleType === 'contractor') {
+    return 'TERMINOLOGY: This is a federal contractor application. Keep federal agency names, program names, and technical federal terms where relevant to demonstrate government experience. Translate internal HR jargon (GS grades, OPM, FEVS) into plain language equivalents where they do not add value for a contractor audience.';
+  } else {
+    return 'TERMINOLOGY: This is a private sector application. Translate all federal government terminology into private sector equivalents that convey the same scope and meaning. Never remove federal experience -- reframe it so a private sector recruiter immediately understands it. Examples: USPHS Commissioned Corps becomes specialized clinical and uniformed staff; OPM guidance becomes federal employment regulations; Title 5 and Title 42 become competitive and excepted service hiring authorities; GS grades become staff seniority levels; FEVS becomes employee engagement survey; program offices become business units; appointing authorities become hiring methods. Apply this translation throughout all bullets, summary, and competencies.';
+  }
+}
+
 async function generateAll() {
   const title = document.getElementById('job-title').value.trim();
   const company = document.getElementById('job-company').value.trim();
@@ -678,7 +707,7 @@ async function generateAll() {
 
   const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience on both sides of the hiring desk - as a recruiter who has written job postings and screened hundreds of resumes, and as a career coach who positions candidates to win. You operate with a dual mindset on every resume you write. MINDSET 1 - THINK LIKE THE HIRING MANAGER: Read the job posting and understand exactly what problem they are trying to solve, what gap they are filling, what kind of person would make them stop scrolling. Know what language they respond to, what experience signals fit, and what would make them pick up the phone. MINDSET 2 - CHAMPION THE CANDIDATE: Your job is to build the strongest possible case for this specific person for this specific role using only what exists in their work history. Treat them as the ideal candidate and make the resume reflect that. Every bullet, every phrase, every word choice should answer the hiring manager's unspoken question: why is this person the right hire? Follow these principles: 1) MIRROR THE POSTING'S LANGUAGE EXACTLY - use the hiring manager's own words and phrases to describe the candidate's experience. If they wrote 'talent pipeline development' use that phrase. If they wrote 'stakeholder partnership' use that phrase. Speak their language back to them. 2) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove. 3) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position, not the position they are coming from. 4) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes that are implied in the work history but not explicitly stated. 5) QUANTIFY EVERYTHING POSSIBLE - use every metric in the work history. Where numbers are implied by context, reflect the scale. 6) BRIDGE GAPS CONFIDENTLY - when experience is adjacent rather than direct, articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. 7) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome. 8) Never use em dashes. Use plain punctuation only. 9) Never ask questions or acknowledge limitations. Execute completely with what is provided. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything that does not exist in the work history.`;
 
-  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
 
   if (wantCover) promises.push(callClaude(system, `${ctx}\n\nTASK: Write a compelling cover letter for this role. 4 paragraphs: 1) Strong opening naming the role with the strongest qualification, 2) Most relevant experience with specific metrics, 3) What uniquely positions this candidate for this role, 4) Confident closing with a call to action. Professional but personable. No generic openings like "I am writing to apply."`));
 
@@ -739,7 +768,7 @@ async function generatePhase2(type) {
 
   const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience on both sides of the hiring desk - as a recruiter who has written job postings and screened hundreds of resumes, and as a career coach who positions candidates to win. You operate with a dual mindset on every resume you write. MINDSET 1 - THINK LIKE THE HIRING MANAGER: Read the job posting and understand exactly what problem they are trying to solve, what gap they are filling, what kind of person would make them stop scrolling. Know what language they respond to, what experience signals fit, and what would make them pick up the phone. MINDSET 2 - CHAMPION THE CANDIDATE: Your job is to build the strongest possible case for this specific person for this specific role using only what exists in their work history. Treat them as the ideal candidate and make the resume reflect that. Every bullet, every phrase, every word choice should answer the hiring manager's unspoken question: why is this person the right hire? Follow these principles: 1) MIRROR THE POSTING'S LANGUAGE EXACTLY - use the hiring manager's own words and phrases to describe the candidate's experience. If they wrote 'talent pipeline development' use that phrase. If they wrote 'stakeholder partnership' use that phrase. Speak their language back to them. 2) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove. 3) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position, not the position they are coming from. 4) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes that are implied in the work history but not explicitly stated. 5) QUANTIFY EVERYTHING POSSIBLE - use every metric in the work history. Where numbers are implied by context, reflect the scale. 6) BRIDGE GAPS CONFIDENTLY - when experience is adjacent rather than direct, articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. 7) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome. 8) Never use em dashes. Use plain punctuation only. 9) Never ask questions or acknowledge limitations. Execute completely with what is provided. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything that does not exist in the work history.`;
 
-  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
 
   const btn = document.getElementById('btn-' + (type === 'gap' ? 'gap' : type === 'score' ? 'score' : 'cover'));
   btn.disabled = true;
