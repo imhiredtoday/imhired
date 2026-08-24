@@ -313,7 +313,7 @@ function checkCode() {
       <div style="margin-top:12px;">
         <label class="field-label">Application type</label>
         <div class="role-type-toggle">
-          <button class="role-type-btn rtype-active" id="rtype-private" onclick="setRoleType('private')">Private sector</button>
+          <button class="role-type-btn" id="rtype-private" style="background:#1a160a;border:1px solid #c9a96e;color:#c9a96e;font-weight:500;" onclick="setRoleType('private')">Private sector</button>
           <button class="role-type-btn" id="rtype-contractor" onclick="setRoleType('contractor')">Federal contractor</button>
           <button class="role-type-btn" id="rtype-federal" onclick="setRoleType('federal')">Federal government</button>
         </div>
@@ -659,7 +659,18 @@ let currentRoleType = 'private';
 function setRoleType(type) {
   currentRoleType = type;
   ['private','contractor','federal'].forEach(t => {
-    document.getElementById('rtype-' + t).classList.toggle('rtype-active', t === type);
+    const btn = document.getElementById('rtype-' + t);
+    if (t === type) {
+      btn.style.background = '#1a160a';
+      btn.style.border = '1px solid #c9a96e';
+      btn.style.color = '#c9a96e';
+      btn.style.fontWeight = '500';
+    } else {
+      btn.style.background = '#141414';
+      btn.style.border = '1px solid #2a2a2a';
+      btn.style.color = '#6b6660';
+      btn.style.fontWeight = '400';
+    }
   });
 }
 
