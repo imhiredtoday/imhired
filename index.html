@@ -313,7 +313,7 @@ function checkCode() {
       <div style="margin-top:12px;">
         <label class="field-label">Application type</label>
         <div class="role-type-toggle">
-          <button class="role-type-btn active" id="rtype-private" onclick="setRoleType('private')">Private sector</button>
+          <button class="role-type-btn rtype-active" id="rtype-private" onclick="setRoleType('private')">Private sector</button>
           <button class="role-type-btn" id="rtype-contractor" onclick="setRoleType('contractor')">Federal contractor</button>
           <button class="role-type-btn" id="rtype-federal" onclick="setRoleType('federal')">Federal government</button>
         </div>
@@ -659,7 +659,7 @@ let currentRoleType = 'private';
 function setRoleType(type) {
   currentRoleType = type;
   ['private','contractor','federal'].forEach(t => {
-    document.getElementById('rtype-' + t).classList.toggle('active', t === type);
+    document.getElementById('rtype-' + t).classList.toggle('rtype-active', t === type);
   });
 }
 
