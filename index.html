@@ -332,6 +332,7 @@ function checkCode() {
       </div>
       <label class="field-label" style="margin-top:8px;">Paste your full resume or work history</label>
       <span class="field-hint">Include all roles, bullets, dates, and metrics. Click Save to store it - paste once, use forever.</span>
+      <div style="font-size:11px;color:#444;margin-bottom:8px;padding:8px 10px;background:#0a0a0a;border-radius:6px;border:1px solid #1e1e1e;">Privacy note: This site does not ask for your name, email, or contact information. Your saved work history remains in your browser. Text submitted for generation is processed by the AI service. Resume details may still identify you -- remove your name, address, phone, email, and any personal information you do not want processed before submitting.</div>
       <textarea class="ta-lg" id="work-history" placeholder="Paste your full work history here - all roles, all bullets, dates, and metrics..."></textarea>
     </div>
 
@@ -355,6 +356,21 @@ function checkCode() {
     <!-- STEP 4 -->
 
 
+    <!-- STEP 3.5 - ADDITIONAL QUALIFICATIONS -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+        <span class="step-label">Additional Qualifications (Optional)</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="saved-badge" id="saved-badge-aq" style="display:none;">✓ Saved</span>
+          <button class="btn-ghost btn-sm" onclick="saveAddQuals()">Save quals</button>
+          <button class="btn-ghost btn-sm" onclick="clearAddQuals()">Clear saved</button>
+        </div>
+      </div>
+      <span class="field-hint" style="margin-top:6px;display:block;">Add any education, certifications, licenses, systems, software, technical skills, professional training, industry experience, languages, clearances, awards, or accomplishments you want considered. Only include information that is accurate and that you would be comfortable placing on your resume.</span>
+      <textarea class="ta-sm" id="add-quals" placeholder="e.g. PMP certification, Workday HRIS, Spanish (conversational), Secret clearance, Hampton University BS Business Administration, Key Executive Leadership Program (American University)..." style="margin-top:8px;"></textarea>
+      <div style="font-size:11px;color:#444;margin-top:6px;">Paste professional experience only. Remove contact information and other personal details before submitting.</div>
+    </div>
+
     <div class="btn-row">
       <button class="btn-primary" id="gen-btn" onclick="generateAll()">Generate ↗</button>
       <button class="btn-ghost" onclick="clearForm()">Clear job fields</button>
@@ -371,7 +387,7 @@ function checkCode() {
       <div class="score-card" id="score-card" style="display:none;">
         <div class="score-header">
           <div>
-            <div class="score-title">Candidate Strength Score</div>
+            <div class="score-title">Tailored Resume Match Score</div>
             <div class="score-label" id="score-label">Analyzing...</div>
           </div>
           <div style="text-align:right;">
@@ -424,7 +440,7 @@ function checkCode() {
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-ghost" id="btn-cover" onclick="generatePhase2('cover')">Generate cover letter</button>
             <button class="btn-ghost" id="btn-gap" onclick="generatePhase2('gap')">Generate gap analysis</button>
-            <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate strength score</button>
+            <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate match score</button>
             <button class="btn-ghost" id="btn-title" onclick="generatePhase2('title')">Suggest job title alignment</button>
           </div>
         </div>
@@ -533,6 +549,31 @@ function clearHistory() {
   document.getElementById('saved-badge').style.display = 'none';
 }
 
+function saveAddQuals() {
+  const val = document.getElementById('add-quals').value.trim();
+  if (!val) { alert('Please add your qualifications first.'); return; }
+  localStorage.setItem('imhired_add_quals', val);
+  document.getElementById('saved-badge-aq').style.display = 'inline-block';
+  const btn = event.target;
+  btn.textContent = 'Saved!';
+  setTimeout(() => btn.textContent = 'Save quals', 2000);
+}
+
+function clearAddQuals() {
+  if (!confirm('Clear your saved additional qualifications?')) return;
+  localStorage.removeItem('imhired_add_quals');
+  document.getElementById('add-quals').value = '';
+  document.getElementById('saved-badge-aq').style.display = 'none';
+}
+
+function loadSavedAddQuals() {
+  const saved = localStorage.getItem('imhired_add_quals');
+  if (saved) {
+    document.getElementById('add-quals').value = saved;
+    document.getElementById('saved-badge-aq').style.display = 'inline-block';
+  }
+}
+
 /* ADDONS */
 function toggleChip(id) {
   const chip = document.getElementById('chip-' + id);
@@ -606,13 +647,13 @@ function resetOutputs() {
   });
   document.getElementById('btn-cover') && (document.getElementById('btn-cover').textContent = 'Generate cover letter');
   document.getElementById('btn-gap') && (document.getElementById('btn-gap').textContent = 'Generate gap analysis');
-  document.getElementById('btn-score') && (document.getElementById('btn-score').textContent = 'Generate strength score');
+  document.getElementById('btn-score') && (document.getElementById('btn-score').textContent = 'Generate match score');
   document.getElementById('btn-title') && (document.getElementById('btn-title').textContent = 'Suggest job title alignment');
   lastOutputs = {};
 }
 
 function fullReset() {
-  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  ['job-title','job-company','job-duties','job-quals'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   setRoleType('private');
   document.getElementById('addon-cover').checked = false;
   document.getElementById('chip-cover').classList.remove('selected');
@@ -716,9 +757,40 @@ async function generateAll() {
     loading('cover-out', 'Drafting your cover letter...');
   }
 
-  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience on both sides of the hiring desk - as a recruiter who has written job postings and screened hundreds of resumes, and as a career coach who positions candidates to win. You operate with a dual mindset on every resume you write. MINDSET 1 - THINK LIKE THE HIRING MANAGER: Read the job posting and understand exactly what problem they are trying to solve, what gap they are filling, what kind of person would make them stop scrolling. Know what language they respond to, what experience signals fit, and what would make them pick up the phone. MINDSET 2 - CHAMPION THE CANDIDATE: Your job is to build the strongest possible case for this specific person for this specific role using only what exists in their work history. Treat them as the ideal candidate and make the resume reflect that. Every bullet, every phrase, every word choice should answer the hiring manager's unspoken question: why is this person the right hire? Follow these principles: 1) MIRROR THE POSTING'S LANGUAGE EXACTLY - use the hiring manager's own words and phrases to describe the candidate's experience. If they wrote 'talent pipeline development' use that phrase. If they wrote 'stakeholder partnership' use that phrase. Speak their language back to them. 2) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove. 3) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position, not the position they are coming from. 4) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes that are implied in the work history but not explicitly stated. 5) QUANTIFY EVERYTHING POSSIBLE - use every metric in the work history. Where numbers are implied by context, reflect the scale. 6) BRIDGE GAPS CONFIDENTLY - when experience is adjacent rather than direct, articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. 7) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome. 8) Never use em dashes. Use plain punctuation only. 9) Never ask questions or acknowledge limitations. Execute completely with what is provided. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything that does not exist in the work history.`;
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert resume strategist, senior recruiter, ATS optimization specialist, and hiring manager with extensive federal and private-sector experience. Your objective is to build the strongest possible case for the candidate by identifying, translating, prioritizing, and elevating all supported experience that aligns with the target role.
 
-  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
+BEFORE WRITING, internally complete this analysis:
+- Identify the primary function and seniority of the target role
+- Extract the most important duties and required qualifications
+- Identify repeated and high-priority terminology and likely ATS screening terms
+- Map the candidate's experience to those criteria
+- Identify equivalent functions described using different terminology
+- Determine which roles and accomplishments provide the strongest evidence
+- Create a keyword placement strategy across the summary, competencies, and experience sections
+
+MINDSET 1 - THINK LIKE THE HIRING MANAGER: Understand exactly what problem they are trying to solve and what would make them stop scrolling. Know what language they respond to and what experience signals fit.
+
+MINDSET 2 - CHAMPION THE CANDIDATE: Build the strongest possible case using only what exists in the work history and additional qualifications. Treat them as the ideal candidate. Position the candidate as a direct and highly competitive match whenever the work history provides a reasonable functional basis.
+
+COMPETITIVE POSITIONING PRINCIPLES:
+1) MIRROR THE POSTING LANGUAGE EXACTLY - use the hiring manager's own words and phrases. Critical terms must appear within experience bullets, not only in the competencies section.
+2) STRATEGIC INFERENCE - infer reasonable scope, complexity, business impact, and strategic value from the documented work. If the candidate performed a recognized function without carrying that exact title, use the accepted market terminology. Do not require exact terminology in the source material before using an accurate market equivalent. Do not unnecessarily describe experience as transferable, adjacent, exposure to, or familiarity with.
+3) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove.
+4) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position.
+5) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes implied in the work history.
+6) QUANTIFY EVERYTHING POSSIBLE - use every metric. Where numbers are implied by context, reflect the scale.
+7) BRIDGE GAPS CONFIDENTLY - articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. Show relevance through wording and positioning, never state it explicitly.
+8) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome.
+9) ADDITIONAL QUALIFICATIONS - treat any additional qualifications provided as valid candidate evidence. Use certifications, systems, education, clearances, and awards strategically when they align with the target role. Place them appropriately: education and certifications in the summary or competencies; systems and technical skills in relevant experience bullets; awards where they provide persuasive performance evidence.
+10) BULLET DEPTH - review and preserve the substance of the candidate's complete work history. Do not arbitrarily reduce each role to a fixed number of bullets. Preserve all significant accomplishments, responsibilities, metrics, leadership scope, specialized expertise, and experience relevant to the target role. The number and depth of bullets should reflect the candidate's career length, seniority, breadth, and relevance. Consolidate only genuinely repetitive or low-value content. Give the most relevant role the greatest depth. Use earlier roles to reinforce relevant experience and career progression. Front-load the most relevant function, result, or scope in each bullet.
+11) Never use em dashes. Use plain punctuation only.
+12) Never ask questions or acknowledge limitations. Execute completely with what is provided.
+13) BOUNDARY - do not invent any employer, degree, certification, software platform, industry, clearance, job title, metric, or responsibility with no foundation in the candidate's information provided.
+
+For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything not present in the provided information.`;
+
+  const addQuals = document.getElementById('add-quals')?.value?.trim() || '';
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}${addQuals ? '\n\nADDITIONAL QUALIFICATIONS (treat as valid candidate evidence):\n' + addQuals : ''}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
 
   if (wantCover) promises.push(callClaude(system, `${ctx}\n\nTASK: Write a compelling cover letter for this role. 4 paragraphs: 1) Strong opening naming the role with the strongest qualification, 2) Most relevant experience with specific metrics, 3) What uniquely positions this candidate for this role, 4) Confident closing with a call to action. Professional but personable. No generic openings like "I am writing to apply."`));
 
@@ -777,9 +849,40 @@ async function generatePhase2(type) {
   const duties = document.getElementById('job-duties').value.trim();
   const quals = document.getElementById('job-quals').value.trim();
 
-  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert HR professional and career coach with 20+ years of experience on both sides of the hiring desk - as a recruiter who has written job postings and screened hundreds of resumes, and as a career coach who positions candidates to win. You operate with a dual mindset on every resume you write. MINDSET 1 - THINK LIKE THE HIRING MANAGER: Read the job posting and understand exactly what problem they are trying to solve, what gap they are filling, what kind of person would make them stop scrolling. Know what language they respond to, what experience signals fit, and what would make them pick up the phone. MINDSET 2 - CHAMPION THE CANDIDATE: Your job is to build the strongest possible case for this specific person for this specific role using only what exists in their work history. Treat them as the ideal candidate and make the resume reflect that. Every bullet, every phrase, every word choice should answer the hiring manager's unspoken question: why is this person the right hire? Follow these principles: 1) MIRROR THE POSTING'S LANGUAGE EXACTLY - use the hiring manager's own words and phrases to describe the candidate's experience. If they wrote 'talent pipeline development' use that phrase. If they wrote 'stakeholder partnership' use that phrase. Speak their language back to them. 2) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove. 3) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position, not the position they are coming from. 4) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes that are implied in the work history but not explicitly stated. 5) QUANTIFY EVERYTHING POSSIBLE - use every metric in the work history. Where numbers are implied by context, reflect the scale. 6) BRIDGE GAPS CONFIDENTLY - when experience is adjacent rather than direct, articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. 7) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome. 8) Never use em dashes. Use plain punctuation only. 9) Never ask questions or acknowledge limitations. Execute completely with what is provided. For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything that does not exist in the work history.`;
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert resume strategist, senior recruiter, ATS optimization specialist, and hiring manager with extensive federal and private-sector experience. Your objective is to build the strongest possible case for the candidate by identifying, translating, prioritizing, and elevating all supported experience that aligns with the target role.
 
-  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
+BEFORE WRITING, internally complete this analysis:
+- Identify the primary function and seniority of the target role
+- Extract the most important duties and required qualifications
+- Identify repeated and high-priority terminology and likely ATS screening terms
+- Map the candidate's experience to those criteria
+- Identify equivalent functions described using different terminology
+- Determine which roles and accomplishments provide the strongest evidence
+- Create a keyword placement strategy across the summary, competencies, and experience sections
+
+MINDSET 1 - THINK LIKE THE HIRING MANAGER: Understand exactly what problem they are trying to solve and what would make them stop scrolling. Know what language they respond to and what experience signals fit.
+
+MINDSET 2 - CHAMPION THE CANDIDATE: Build the strongest possible case using only what exists in the work history and additional qualifications. Treat them as the ideal candidate. Position the candidate as a direct and highly competitive match whenever the work history provides a reasonable functional basis.
+
+COMPETITIVE POSITIONING PRINCIPLES:
+1) MIRROR THE POSTING LANGUAGE EXACTLY - use the hiring manager's own words and phrases. Critical terms must appear within experience bullets, not only in the competencies section.
+2) STRATEGIC INFERENCE - infer reasonable scope, complexity, business impact, and strategic value from the documented work. If the candidate performed a recognized function without carrying that exact title, use the accepted market terminology. Do not require exact terminology in the source material before using an accurate market equivalent. Do not unnecessarily describe experience as transferable, adjacent, exposure to, or familiarity with.
+3) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove.
+4) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position.
+5) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes implied in the work history.
+6) QUANTIFY EVERYTHING POSSIBLE - use every metric. Where numbers are implied by context, reflect the scale.
+7) BRIDGE GAPS CONFIDENTLY - articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. Show relevance through wording and positioning, never state it explicitly.
+8) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome.
+9) ADDITIONAL QUALIFICATIONS - treat any additional qualifications provided as valid candidate evidence. Use certifications, systems, education, clearances, and awards strategically when they align with the target role. Place them appropriately: education and certifications in the summary or competencies; systems and technical skills in relevant experience bullets; awards where they provide persuasive performance evidence.
+10) BULLET DEPTH - review and preserve the substance of the candidate's complete work history. Do not arbitrarily reduce each role to a fixed number of bullets. Preserve all significant accomplishments, responsibilities, metrics, leadership scope, specialized expertise, and experience relevant to the target role. The number and depth of bullets should reflect the candidate's career length, seniority, breadth, and relevance. Consolidate only genuinely repetitive or low-value content. Give the most relevant role the greatest depth. Use earlier roles to reinforce relevant experience and career progression. Front-load the most relevant function, result, or scope in each bullet.
+11) Never use em dashes. Use plain punctuation only.
+12) Never ask questions or acknowledge limitations. Execute completely with what is provided.
+13) BOUNDARY - do not invent any employer, degree, certification, software platform, industry, clearance, job title, metric, or responsibility with no foundation in the candidate's information provided.
+
+For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything not present in the provided information.`;
+
+  const addQuals = document.getElementById('add-quals')?.value?.trim() || '';
+  const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}${addQuals ? '\n\nADDITIONAL QUALIFICATIONS (treat as valid candidate evidence):\n' + addQuals : ''}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
 
   const btn = document.getElementById('btn-' + (type === 'gap' ? 'gap' : type === 'score' ? 'score' : 'cover'));
   btn.disabled = true;
@@ -811,7 +914,7 @@ async function generatePhase2(type) {
     if (type === 'score') {
       document.getElementById('score-card').style.display = 'block';
       document.getElementById('score-summary').textContent = 'Calculating...';
-      const scoreRaw = await callClaude(system, ctx + '\n\nTASK: Score this candidate for this role. Return ONLY a JSON object:\n{"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence honest assessment of strengths, gaps, and potential score with recommended additions"}');
+      const scoreRaw = await callClaude(system, ctx + '\n\nTASK: Score the TAILORED RESUME you just generated against this job posting. This is a Tailored Resume Match Score, not a raw candidate score. Use this rubric: 30 points for coverage of required and preferred qualifications; 25 points for alignment with major job duties; 20 points for critical keyword coverage and placement; 15 points for evidence, accomplishments, metrics, and scope; 10 points for seniority, title, and functional alignment. Total is 100 points. Strategic equivalents and reasonable functional alignment count -- do not require literal title or industry matches. Do not allow optimistic writing to inflate the score. Return ONLY a JSON object: {"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence assessment of the tailored resume strengths, any remaining gaps, and what would improve the score further"}');
       const score = renderScore(scoreRaw);
       lastOutputs.score = score;
     }
@@ -830,7 +933,7 @@ async function generatePhase2(type) {
   }
 
   btn.disabled = false;
-  btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : type === 'score' ? 'Generate strength score' : 'Suggest job title alignment';
+  btn.textContent = type === 'cover' ? 'Generate cover letter' : type === 'gap' ? 'Generate gap analysis' : type === 'score' ? 'Generate match score' : 'Suggest job title alignment';
 }
 
 function saveToLibrary() {
@@ -851,7 +954,7 @@ function saveToLibrary() {
   library.unshift(entry);
   saveLib(); updateLibBadge();
   // Clear job fields for next application
-  ['job-title','job-company','job-duties','job-quals'].forEach(id => document.getElementById(id).value = '');
+  ['job-title','job-company','job-duties','job-quals'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('addon-cover').checked = false;
   document.getElementById('chip-cover').classList.remove('selected');
   const btn = event.target; btn.textContent = 'Saved! Fields cleared for next job.';
@@ -954,7 +1057,7 @@ function openInClaude() {
   const quals = document.getElementById('job-quals').value.trim();
   if (!history) { alert('Please paste your work history first.'); return; }
   const extras = wantCover ? ' Also generate a cover letter.' : '';
-  const prompt = `Please tailor my resume for the following role. Generate: tailored bullet points grouped by role, a professional summary, a ranked core competencies block (top 12, pipe-separated, ready to paste), a keywords gap analysis, and a candidate strength score out of 100 with breakdown across keyword match, experience alignment, qualifications coverage, and overall competitiveness.${extras}\n\nTARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nMY WORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
+  const prompt = `Please tailor my resume for the following role. Generate: tailored bullet points grouped by role, a professional summary, a ranked core competencies block (top 12, pipe-separated, ready to paste), a keywords gap analysis, and a tailored resume match score out of 100 with breakdown across keyword match, experience alignment, qualifications coverage, and overall competitiveness.${extras}\n\nTARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nMY WORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
   window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
 }
 
@@ -971,6 +1074,7 @@ document.getElementById('view-modal').addEventListener('click', e => { if (e.tar
 /* GATE JS MOVED */
 
 loadSavedHistory();
+loadSavedAddQuals();
 updateLibBadge();
 
 
