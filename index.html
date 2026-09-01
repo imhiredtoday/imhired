@@ -434,6 +434,11 @@ function checkCode() {
 
 
 
+      <div class="output-card" id="additions-card" style="display:none;margin-bottom:14px;">
+        <div class="output-label">Recommended resume additions <button class="btn-ghost btn-sm" onclick="copyOut('additions-out')">Copy</button></div>
+        <div class="result-box placeholder" id="additions-out">Recommendations from your additional qualifications will appear here...</div>
+      </div>
+
       <div id="phase2-btns" style="display:none;margin-bottom:14px;">
         <div class="output-card" style="padding:14px 18px;">
           <div style="font-size:10px;color:#c9a96e;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Want more?</div>
@@ -628,6 +633,7 @@ function resetOutputs() {
   document.getElementById('output-section').style.display = 'none';
   document.getElementById('phase2-btns').style.display = 'none';
   document.getElementById('score-card').style.display = 'none';
+  document.getElementById('additions-card').style.display = 'none';
   document.getElementById('addon-outputs').innerHTML = '';
   ['bullets-out','summary-out','competencies-out'].forEach(id => {
     const el = document.getElementById(id);
@@ -815,6 +821,17 @@ if (compEl) {
   compEl.innerHTML = '<p style="font-size:13px;color:#c8c4be;line-height:2;letter-spacing:0.02em;">' + compText + '</p>';
   compEl.classList.remove('placeholder');
 }
+
+    // Generate recommended additions if additional quals were provided
+    const addQualsVal = document.getElementById('add-quals')?.value?.trim() || '';
+    if (addQualsVal) {
+      loading('additions-out', 'Identifying relevant qualifications for this role...');
+      document.getElementById('additions-card').style.display = 'block';
+      const additions = await callClaude(system, ctx + '\n\nTASK: Review the ADDITIONAL QUALIFICATIONS provided and identify which ones are relevant to this specific role. Return two short sections:\n\nINCLUDE ON YOUR RESUME FOR THIS ROLE: List each relevant qualification with a brief one-phrase note on why it strengthens this application.\n\nNOT NEEDED FOR THIS ROLE: List any that do not add value for this specific posting.\n\nBe honest, concise, and specific. No em dashes.');
+      renderOut('additions-out', additions);
+    } else {
+      document.getElementById('additions-card').style.display = 'none';
+    }
 
     lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
     document.getElementById('status-text').textContent = 'Done - want more? Add cover letter, gap analysis, or strength score below.';
