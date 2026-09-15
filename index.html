@@ -601,7 +601,7 @@ function renderOut(id, text) {
 async function callClaude(system, user) {
   const res = await fetch('/api/claude', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 2000, system, messages: [{ role: 'user', content: user }] })
+    body: JSON.stringify({ model: 'claude-sonnet-5-20260630', max_tokens: 2000, system, messages: [{ role: 'user', content: user }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -838,8 +838,16 @@ if (compEl) {
     document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
-    document.getElementById('bullets-out').textContent = 'Error connecting to AI: ' + err.message + '. Try the "Open in Claude" button instead.';
-    document.getElementById('status-text').textContent = '';
+    const errMsg = 'Error: ' + err.message + '. Try the Open in Claude button instead.';
+    ['bullets-out','summary-out','competencies-out'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && (el.innerHTML === '' || el.classList.contains('placeholder'))) {
+        el.textContent = errMsg;
+        el.classList.remove('placeholder');
+      }
+    });
+    document.getElementById('status-text').textContent = 'Generation failed. Check your inputs and try again.';
+    console.error('Generation error:', err);
   }
 
   btn.disabled = false; btn.textContent = 'Generate ↗';
