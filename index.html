@@ -333,7 +333,7 @@ function checkCode() {
       <label class="field-label" style="margin-top:8px;">Paste your full resume or work history</label>
       <span class="field-hint">Include all roles, bullets, dates, and metrics. Click Save to store it - paste once, use forever.</span>
       <div style="font-size:11px;color:#444;margin-bottom:8px;padding:8px 10px;background:#0a0a0a;border-radius:6px;border:1px solid #1e1e1e;">Privacy note: This site does not ask for your name, email, or contact information. Your saved work history remains in your browser. Text submitted for generation is processed by the AI service. Resume details may still identify you -- remove your name, address, phone, email, and any personal information you do not want processed before submitting.</div>
-      <textarea class="ta-lg" id="work-history" placeholder="Paste your complete work history here — all roles, titles, dates, key responsibilities, and any metrics or accomplishments. The more detail you include, the stronger your tailored output will be."></textarea>
+      <textarea class="ta-lg" id="work-history" placeholder="Paste your complete work history here -- all roles, titles, dates, key responsibilities, and any metrics or accomplishments. The more detail you include, the stronger your tailored output will be."></textarea>
     </div>
 
     <!-- STEP 3 -->
@@ -418,24 +418,24 @@ function checkCode() {
       <!-- CORE OUTPUTS -->
       <div class="two-col" style="margin-bottom:14px;">
         <div class="output-card">
-          <div class="output-label">Tailored bullet points <button class="btn-ghost btn-sm" onclick="copyOut('bullets-out')">Copy</button></div>
+          <div class="output-label">Tailored bullet points <button class="btn-ghost btn-sm" onclick=\"copyOut('bullets-out', this)\">Copy</button></div>
           <div class="result-box placeholder" id="bullets-out">Your tailored bullets will appear here...</div>
         </div>
         <div class="output-card">
-          <div class="output-label">Professional summary <button class="btn-ghost btn-sm" onclick="copyOut('summary-out')">Copy</button></div>
+          <div class="output-label">Professional summary <button class="btn-ghost btn-sm" onclick=\"copyOut('summary-out', this)\">Copy</button></div>
           <div class="result-box placeholder" id="summary-out">Your professional summary will appear here...</div>
         </div>
       </div>
 
       <div class="output-card" style="margin-bottom:14px;">
-        <div class="output-label">Core competencies block <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">- paste directly below your summary</span> <button class="btn-ghost btn-sm" onclick="copyOut('competencies-out')">Copy</button></div>
+        <div class="output-label">Core competencies block <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">- paste directly below your summary</span> <button class="btn-ghost btn-sm" onclick=\"copyOut('competencies-out', this)\">Copy</button></div>
         <div class="result-box placeholder" id="competencies-out">Your tailored competencies block will appear here...</div>
       </div>
 
 
 
       <div class="output-card" id="additions-card" style="display:none;margin-bottom:14px;">
-        <div class="output-label">Recommended resume additions <button class="btn-ghost btn-sm" onclick="copyOut('additions-out')">Copy</button></div>
+        <div class="output-label">Recommended resume additions <button class="btn-ghost btn-sm" onclick=\"copyOut('additions-out', this)\">Copy</button></div>
         <div class="result-box placeholder" id="additions-out">Recommendations from your additional qualifications will appear here...</div>
       </div>
 
@@ -759,7 +759,7 @@ async function generateAll() {
   const addonEl = document.getElementById('addon-outputs');
   addonEl.innerHTML = '';
   if (wantCover) {
-    addonEl.innerHTML = `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick="copyOut('cover-out')">Copy</button></div><div class="result-box placeholder" id="cover-out">Your cover letter will appear here...</div></div>`;
+    addonEl.innerHTML = `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick=\"copyOut('cover-out', this)\">Copy</button></div><div class="result-box placeholder" id="cover-out">Your cover letter will appear here...</div></div>`;
     loading('cover-out', 'Drafting your cover letter...');
   }
 
@@ -846,11 +846,14 @@ if (compEl) {
 }
 
 /* COPY */
-function copyOut(id) {
+function copyOut(id, btnEl) {
   const el = document.getElementById(id); if (!el) return;
   navigator.clipboard.writeText(el.innerText).then(() => {
-    const btn = event.target; const orig = btn.textContent;
-    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
+    if (btnEl) {
+      const orig = btnEl.textContent;
+      btnEl.textContent = 'Copied!';
+      setTimeout(() => btnEl.textContent = orig, 2000);
+    }
   });
 }
 
@@ -910,7 +913,7 @@ For federal roles keep government terminology. For private sector translate fede
   try {
     if (type === 'cover') {
       if (!document.getElementById('cover-out')) {
-        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick="copyOut('cover-out')">Copy</button></div><div class="result-box" id="cover-out"></div></div>`;
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Cover letter <button class="btn-ghost btn-sm" onclick=\"copyOut('cover-out', this)\">Copy</button></div><div class="result-box" id="cover-out"></div></div>`;
       }
       loading('cover-out', 'Drafting your cover letter...');
       const cover = await callClaude(system, ctx + '\n\nTASK: Write a compelling cover letter. 4 paragraphs: strong opening naming the role, relevant experience with metrics, unique positioning, confident closing with call to action. Professional but human tone. No em dashes. No generic openings like I am writing to apply.');
@@ -920,7 +923,7 @@ For federal roles keep government terminology. For private sector translate fede
 
     if (type === 'gap') {
       if (!document.getElementById('keywords-out2')) {
-        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick="copyOut('keywords-out2')">Copy</button></div><div class="result-box" id="keywords-out2"></div></div>`;
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Keywords gap analysis <button class="btn-ghost btn-sm" onclick=\"copyOut('keywords-out2', this)\">Copy</button></div><div class="result-box" id="keywords-out2"></div></div>`;
       }
       loading('keywords-out2', 'Running keywords gap analysis...');
       const keywords = await callClaude(system, ctx + '\n\nTASK: Perform a concise keyword gap analysis with exactly three sections:\n\nSECTION 1: KEY KEYWORDS\nList the top 10 most important ATS keywords, one per line, no bullets\n\nSECTION 2: COVERED\nWhich of those keywords appear in the work history, one per line\n\nSECTION 3: GAPS TO ADDRESS\nTop 5 missing keywords with a one-sentence suggestion each');
@@ -938,7 +941,7 @@ For federal roles keep government terminology. For private sector translate fede
 
     if (type === 'title') {
       if (!document.getElementById('title-align-out')) {
-        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Job title alignment <button class="btn-ghost btn-sm" onclick="copyOut('title-align-out')">Copy</button></div><div class="result-box" id="title-align-out"></div></div>`;
+        addonEl.innerHTML += `<div class="output-card" style="margin-bottom:14px;"><div class="output-label">Job title alignment <button class="btn-ghost btn-sm" onclick=\"copyOut('title-align-out', this)\">Copy</button></div><div class="result-box" id="title-align-out"></div></div>`;
       }
       loading('title-align-out', 'Analyzing title alignment...');
       const titleAlign = await callClaude(system, ctx + '\n\nTASK: Analyze how the titles in this work history align with the target job title. Do the following:\n\n1. LIST WORK HISTORY TITLES - identify each job title from the work history\n2. TARGET ROLE PERCEPTION - explain how a private sector hiring manager or recruiter would perceive those titles when reviewing this application for the target role\n3. ALIGNMENT GAPS - identify any gaps between how the titles read and what the target role expects\n4. SUGGESTED POSITIONING - for each title, suggest how to reframe or position it for this specific role. If any titles are federal government titles, provide the private sector equivalent. If titles are already private sector, suggest how to position them more competitively.\n5. LINKEDIN AND NETWORKING HEADLINE - suggest a headline the candidate could use that bridges their background to this target role.\n\nBe specific, direct, and actionable. No em dashes.');
