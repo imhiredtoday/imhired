@@ -439,13 +439,65 @@ function checkCode() {
         <div class="result-box placeholder" id="additions-out">Recommendations from your additional qualifications will appear here...</div>
       </div>
 
+      <!-- FRAMING NOTES -->
+      <div class="output-card" id="framing-card" style="display:none;margin-bottom:14px;">
+        <div class="output-label">
+          Framing notes
+          <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">- review before submitting</span>
+          <button class="btn-ghost btn-sm" onclick="copyOut('framing-out', this)">Copy</button>
+        </div>
+        <div class="result-box placeholder" id="framing-out">Framing analysis will appear here...</div>
+      </div>
+
+      <!-- BEFORE/AFTER SCORE -->
+      <div class="score-card" id="score-card" style="display:none;margin-bottom:14px;">
+        <div class="score-header">
+          <div>
+            <div class="score-title">Tailored Resume Match Score</div>
+            <div class="score-label" id="score-label">Analyzing...</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#6b6660;margin-bottom:4px;">RAW vs TAILORED</div>
+            <div style="display:flex;gap:12px;align-items:baseline;justify-content:flex-end;">
+              <div>
+                <div style="font-size:11px;color:#6b6660;">Before</div>
+                <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#6b6660;line-height:1;"><span id="score-raw">--</span><span style="font-size:14px;">/100</span></div>
+              </div>
+              <div style="font-size:20px;color:#444;">→</div>
+              <div>
+                <div style="font-size:11px;color:#c9a96e;">After</div>
+                <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#f0ede8;line-height:1;"><span id="score-num">--</span><span style="font-size:16px;color:#6b6660;">/100</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="score-bars">
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Keyword Match</span><span id="bar-kw">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-kw" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Experience Alignment</span><span id="bar-exp">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-exp" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Qualifications Coverage</span><span id="bar-qual">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-qual" style="width:0%"></div></div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label"><span>Overall Competitiveness</span><span id="bar-overall">--%</span></div>
+            <div class="score-bar-track"><div class="score-bar-fill" id="fill-overall" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="score-summary" id="score-summary">Generating your strength assessment...</div>
+      </div>
+
       <div id="phase2-btns" style="display:none;margin-bottom:14px;">
         <div class="output-card" style="padding:14px 18px;">
           <div style="font-size:10px;color:#c9a96e;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Want more?</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-ghost" id="btn-cover" onclick="generatePhase2('cover')">Generate cover letter</button>
-            <button class="btn-ghost" id="btn-gap" onclick="generatePhase2('gap')">Generate gap analysis</button>
-            <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate match score</button>
+<button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate match score</button>
             <button class="btn-ghost" id="btn-title" onclick="generatePhase2('title')">Suggest job title alignment</button>
           </div>
         </div>
@@ -633,6 +685,8 @@ function resetOutputs() {
   document.getElementById('output-section').style.display = 'none';
   document.getElementById('phase2-btns').style.display = 'none';
   document.getElementById('score-card').style.display = 'none';
+  document.getElementById('framing-card').style.display = 'none';
+  ['framing-out'].forEach(id => { const el = document.getElementById(id); if(el) { el.innerHTML = ''; el.classList.add('placeholder'); } });
   document.getElementById('additions-card').style.display = 'none';
   document.getElementById('addon-outputs').innerHTML = '';
   ['bullets-out','summary-out','competencies-out'].forEach(id => {
@@ -833,8 +887,51 @@ if (compEl) {
       document.getElementById('additions-card').style.display = 'none';
     }
 
+    // FRAMING NOTES
+    document.getElementById('status-text').textContent = 'Analyzing framing...';
+    document.getElementById('framing-card').style.display = 'block';
+    loading('framing-out', 'Reviewing bullets for framing concerns...');
+    const roleTypeLabel = currentRoleType === 'federal' ? 'FEDERAL GOVERNMENT' : currentRoleType === 'contractor' ? 'FEDERAL CONTRACTOR' : 'PRIVATE SECTOR';
+    const framingRules = currentRoleType === 'federal'
+      ? 'FEDERAL PRECISION MODE: Flag any bullet where adjacent experience is presented as direct specialized experience. Preserve distinctions between performed, supervised, coordinated, reviewed, and supported. If a required specialized experience element is not clearly supported, flag it. Do not turn advisory roles into ownership roles.'
+      : currentRoleType === 'contractor'
+      ? 'CONTRACTOR TRANSLATION MODE: Translate government terminology into contractor/client-delivery language. Emphasize federal environment knowledge, stakeholder management, and program delivery. Flag any claims where authority or function ownership is overstated beyond what the candidate actually held.'
+      : 'PRIVATE SECTOR TRANSFERABILITY MODE: Surface transferable experience aggressively. Reframe federal processes as private-sector equivalents. Prioritize outcomes, scale, and business impact. Only flag items where the framing would be genuinely misleading to a private sector hiring manager.';
+
+    const framingPrompt = ctx + '\n\nGENERATED BULLETS TO REVIEW:\n' + bullets + '\n\nTASK: Review the generated bullets against the original work history for framing concerns. Application type: ' + roleTypeLabel + '. ' + framingRules + '\n\nFor each concern found, provide exactly this format:\n\n**[Topic]**\nFlag: [what the tension is in one sentence]\nSuggested framing: "[exact example sentence the candidate can use or adapt]"\nAvoid: [specific language not to use]\n\nIf there are no framing concerns, say exactly: "No framing concerns identified. All bullets reflect direct experience as stated in your work history."\n\nBe specific and honest. This is to protect the candidate, not discourage them.';
+    const framing = await callClaude(system, framingPrompt);
+    const framingEl = document.getElementById('framing-out');
+    if (framingEl) { framingEl.innerHTML = marked.parse(framing); framingEl.classList.remove('placeholder'); }
+
+    // RAW SCORE (original work history)
+    document.getElementById('status-text').textContent = 'Calculating match scores...';
+    document.getElementById('score-card').style.display = 'block';
+    const rawScoreRaw = await callClaude(system, `TARGET JOB TITLE: ${title || 'Not specified'}\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}\n\nTASK: Score this candidate's RAW UNMODIFIED work history against this job posting. Return ONLY a JSON object: {"overall":[0-100],"note":"one sentence on raw baseline strength"}`);
+
+    // TAILORED SCORE (generated resume)
+    const tailoredScoreRaw = await callClaude(system, ctx + '\n\nGENERATED RESUME CONTENT:\n' + bullets + '\n\n' + summary + '\n\nTASK: Score this TAILORED RESUME against the job posting using this rubric: 30pts qualifications coverage, 25pts job duties alignment, 20pts keyword coverage, 15pts evidence and metrics, 10pts seniority alignment. Return ONLY a JSON object: {"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence assessment of tailored resume strengths, remaining gaps, and what would improve the score further"}');
+
+    // Render scores
+    try {
+      const rawScore = JSON.parse(rawScoreRaw.match(/\{[\s\S]*\}/)?.[0] || '{}');
+      document.getElementById('score-raw').textContent = rawScore.overall || '--';
+    } catch(e) { document.getElementById('score-raw').textContent = '--'; }
+
+    try {
+      const s = JSON.parse(tailoredScoreRaw.match(/\{[\s\S]*\}/)?.[0] || '{}');
+      const overall = s.overall || 0;
+      document.getElementById('score-num').textContent = overall;
+      document.getElementById('score-label').textContent = overall >= 85 ? 'Strong Match' : overall >= 70 ? 'Competitive Match' : overall >= 55 ? 'Developing Match' : 'Needs Tailoring';
+      const bars = { kw: s.keyword_match || 0, exp: s.experience_alignment || 0, qual: s.qualifications_coverage || 0, overall };
+      Object.entries(bars).forEach(([k, v]) => {
+        document.getElementById('bar-' + k).textContent = v + '%';
+        setTimeout(() => { document.getElementById('fill-' + k).style.width = v + '%'; }, 100);
+      });
+      document.getElementById('score-summary').textContent = s.summary || '';
+    } catch(e) { document.getElementById('score-summary').textContent = 'Score calculation failed.'; }
+
     lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
-    document.getElementById('status-text').textContent = 'Done - want more? Add cover letter, gap analysis, or strength score below.';
+    document.getElementById('status-text').textContent = 'Done - review framing notes before submitting. Add cover letter or title alignment below.';
     document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
