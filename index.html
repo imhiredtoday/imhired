@@ -439,65 +439,13 @@ function checkCode() {
         <div class="result-box placeholder" id="additions-out">Recommendations from your additional qualifications will appear here...</div>
       </div>
 
-      <!-- FRAMING NOTES -->
-      <div class="output-card" id="framing-card" style="display:none;margin-bottom:14px;">
-        <div class="output-label">
-          Framing notes
-          <span style="font-size:10px;color:#444;font-weight:400;text-transform:none;letter-spacing:0;">- review before submitting</span>
-          <button class="btn-ghost btn-sm" onclick="copyOut('framing-out', this)">Copy</button>
-        </div>
-        <div class="result-box placeholder" id="framing-out">Framing analysis will appear here...</div>
-      </div>
-
-      <!-- BEFORE/AFTER SCORE -->
-      <div class="score-card" id="score-card" style="display:none;margin-bottom:14px;">
-        <div class="score-header">
-          <div>
-            <div class="score-title">Tailored Resume Match Score</div>
-            <div class="score-label" id="score-label">Analyzing...</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:11px;color:#6b6660;margin-bottom:4px;">RAW vs TAILORED</div>
-            <div style="display:flex;gap:12px;align-items:baseline;justify-content:flex-end;">
-              <div>
-                <div style="font-size:11px;color:#6b6660;">Before</div>
-                <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#6b6660;line-height:1;"><span id="score-raw">--</span><span style="font-size:14px;">/100</span></div>
-              </div>
-              <div style="font-size:20px;color:#444;">→</div>
-              <div>
-                <div style="font-size:11px;color:#c9a96e;">After</div>
-                <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#f0ede8;line-height:1;"><span id="score-num">--</span><span style="font-size:16px;color:#6b6660;">/100</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="score-bars">
-          <div class="score-bar-item">
-            <div class="score-bar-label"><span>Keyword Match</span><span id="bar-kw">--%</span></div>
-            <div class="score-bar-track"><div class="score-bar-fill" id="fill-kw" style="width:0%"></div></div>
-          </div>
-          <div class="score-bar-item">
-            <div class="score-bar-label"><span>Experience Alignment</span><span id="bar-exp">--%</span></div>
-            <div class="score-bar-track"><div class="score-bar-fill" id="fill-exp" style="width:0%"></div></div>
-          </div>
-          <div class="score-bar-item">
-            <div class="score-bar-label"><span>Qualifications Coverage</span><span id="bar-qual">--%</span></div>
-            <div class="score-bar-track"><div class="score-bar-fill" id="fill-qual" style="width:0%"></div></div>
-          </div>
-          <div class="score-bar-item">
-            <div class="score-bar-label"><span>Overall Competitiveness</span><span id="bar-overall">--%</span></div>
-            <div class="score-bar-track"><div class="score-bar-fill" id="fill-overall" style="width:0%"></div></div>
-          </div>
-        </div>
-        <div class="score-summary" id="score-summary">Generating your strength assessment...</div>
-      </div>
-
       <div id="phase2-btns" style="display:none;margin-bottom:14px;">
         <div class="output-card" style="padding:14px 18px;">
           <div style="font-size:10px;color:#c9a96e;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Want more?</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-ghost" id="btn-cover" onclick="generatePhase2('cover')">Generate cover letter</button>
-<button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate match score</button>
+            <button class="btn-ghost" id="btn-gap" onclick="generatePhase2('gap')">Generate gap analysis</button>
+            <button class="btn-ghost" id="btn-score" onclick="generatePhase2('score')">Generate match score</button>
             <button class="btn-ghost" id="btn-title" onclick="generatePhase2('title')">Suggest job title alignment</button>
           </div>
         </div>
@@ -653,7 +601,7 @@ function renderOut(id, text) {
 async function callClaude(system, user) {
   const res = await fetch('/api/claude', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, system, messages: [{ role: 'user', content: user }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, system, messages: [{ role: 'user', content: user }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -685,8 +633,6 @@ function resetOutputs() {
   document.getElementById('output-section').style.display = 'none';
   document.getElementById('phase2-btns').style.display = 'none';
   document.getElementById('score-card').style.display = 'none';
-  document.getElementById('framing-card').style.display = 'none';
-  ['framing-out'].forEach(id => { const el = document.getElementById(id); if(el) { el.innerHTML = ''; el.classList.add('placeholder'); } });
   document.getElementById('additions-card').style.display = 'none';
   document.getElementById('addon-outputs').innerHTML = '';
   ['bullets-out','summary-out','competencies-out'].forEach(id => {
@@ -777,25 +723,11 @@ function setRoleType(type) {
 
 function getRoleTypeInstruction() {
   if (currentRoleType === 'federal') {
-    return `TERMINOLOGY AND FRAMING MODE: FEDERAL GOVERNMENT - PRECISION STANDARD.
-
-TERMINOLOGY: Keep all federal government terminology exactly as it appears in the work history. Use OPM language, series codes, GS grades, federal agency names, and government-specific terms verbatim. Do not translate anything.
-
-FRAMING: Apply the competitive federal resume standard. Federal HR reviewers are trained to identify the difference between performed, supervised, coordinated, reviewed, and supported. Preserve these distinctions. Use the strongest defensible interpretation of the candidate's actual experience -- but recognize that federal specialized experience requirements are evaluated against strict qualification standards and interview follow-up will expose overstatement. If the candidate's documented experience genuinely demonstrates a function, use the posting's terminology for that function even if the candidate described it in plain language. If using the posting's language would require the candidate to have done something they did not do, preserve the candidate's accurate experience and flag the gap in the framing notes. Apply the fidelity test: could the candidate comfortably defend this statement in a federal interview without having to reduce or correct the impression created?`;
-
+    return 'TERMINOLOGY: This is a federal government application. Keep all federal government terminology exactly as it appears in the work history. Use OPM language, series codes, GS grades, federal agency names, and government-specific terms verbatim. Do not translate anything.';
   } else if (currentRoleType === 'contractor') {
-    return `TERMINOLOGY AND FRAMING MODE: FEDERAL CONTRACTOR - TRANSLATION PLUS STANDARD.
-
-TERMINOLOGY: Keep federal agency names, program names, and technical federal terms where relevant to demonstrate government experience. Translate internal HR jargon (GS grades, OPM, FEVS) into plain language equivalents where they do not add value for a contractor audience.
-
-FRAMING: Translate government terminology into contractor and client-delivery language. Emphasize federal environment knowledge, stakeholder management, program delivery, compliance, and transferable technical knowledge. Apply creative elevation -- strengthen the interpretation and presentation of documented experience. Do not overstate authority, ownership, or functions the candidate did not perform. Use the final test: competitiveness and fidelity both matter.`;
-
+    return 'TERMINOLOGY: This is a federal contractor application. Keep federal agency names, program names, and technical federal terms where relevant to demonstrate government experience. Translate internal HR jargon (GS grades, OPM, FEVS) into plain language equivalents where they do not add value for a contractor audience.';
   } else {
-    return `TERMINOLOGY AND FRAMING MODE: PRIVATE SECTOR - CREATIVE POSITIONING STANDARD.
-
-TERMINOLOGY: Translate all federal government terminology into private sector equivalents that convey the same scope and meaning. Never remove federal experience -- reframe it so a private sector recruiter immediately understands it. Examples: USPHS Commissioned Corps becomes specialized clinical and uniformed staff; OPM guidance becomes federal employment regulations; Title 5 and Title 42 become competitive and excepted service hiring authorities; GS grades become staff seniority levels; FEVS becomes employee engagement survey; program offices become business units; appointing authorities become hiring methods.
-
-FRAMING: Apply the private industry creative positioning standard. This is the most aggressive elevation mode. The candidate's uploaded experience is source material, not a vocabulary limit. A weakly written source should still produce a strong resume when the underlying experience supports one. Rewrite basic tasks as stronger professional contributions. Infer competencies reasonably demonstrated by documented responsibilities. Synthesize multiple related duties into stronger statements of capability. Reframe experience around the needs and priorities of the target role. Do not automatically preserve limiting verbs such as helped, assisted, supported, or participated when the complete description reasonably demonstrates a stronger level of contribution. Do not label experience as transferable, adjacent, or indirect -- position comparable competencies confidently in language relevant to the target role. Do not convert comparable experience into a false claim of direct experience that the source material cannot support.`;
+    return 'TERMINOLOGY: This is a private sector application. Translate all federal government terminology into private sector equivalents that convey the same scope and meaning. Never remove federal experience -- reframe it so a private sector recruiter immediately understands it. Examples: USPHS Commissioned Corps becomes specialized clinical and uniformed staff; OPM guidance becomes federal employment regulations; Title 5 and Title 42 become competitive and excepted service hiring authorities; GS grades become staff seniority levels; FEVS becomes employee engagement survey; program offices become business units; appointing authorities become hiring methods. Apply this translation throughout all bullets, summary, and competencies.';
   }
 }
 
@@ -831,67 +763,37 @@ async function generateAll() {
     loading('cover-out', 'Drafting your cover letter...');
   }
 
-  const system = `You are an expert federal and private sector HR professional, resume strategist, senior recruiter, and hiring manager with 20+ years of experience on both sides of the hiring desk. Your objective is to build the strongest possible, most competitive resume that can reasonably be developed from the candidate's documented experience and the target role.
+  const system = `You are an expert federal and private sector HR professional and career coach with 20+ years of experience. You specialize in resume tailoring, ATS optimization, and positioning candidates for specific roles. You understand how ATS systems work and how hiring managers evaluate resumes. You are an expert resume strategist, senior recruiter, ATS optimization specialist, and hiring manager with extensive federal and private-sector experience. Your objective is to build the strongest possible case for the candidate by identifying, translating, prioritizing, and elevating all supported experience that aligns with the target role.
 
-BEFORE WRITING, silently complete this analysis:
+BEFORE WRITING, internally complete this analysis:
 - Identify the primary function and seniority of the target role
 - Extract the most important duties and required qualifications
-- Identify high-priority terminology and likely ATS screening terms
-- Map the candidate's documented experience to those criteria
+- Identify repeated and high-priority terminology and likely ATS screening terms
+- Map the candidate's experience to those criteria
 - Identify equivalent functions described using different terminology
 - Determine which roles and accomplishments provide the strongest evidence
-- Create a keyword placement strategy across summary, competencies, and bullets
+- Create a keyword placement strategy across the summary, competencies, and experience sections
 
-DUAL MINDSET - THINK LIKE THE HIRING MANAGER AND CHAMPION THE CANDIDATE: Understand exactly what problem the hiring manager is trying to solve. Build the strongest possible case using only what exists in the work history and additional qualifications. Treat the candidate as the ideal applicant.
+MINDSET 1 - THINK LIKE THE HIRING MANAGER: Understand exactly what problem they are trying to solve and what would make them stop scrolling. Know what language they respond to and what experience signals fit.
 
-CORE FRAMING STANDARD - APPLIES TO ALL APPLICATIONS:
-The uploaded experience is source material, not a writing template or vocabulary limit. Candidates often provide resumes that are task-focused, understated, outdated, or that fail to communicate the professional significance of their work. Do not reproduce those weaknesses.
+MINDSET 2 - CHAMPION THE CANDIDATE: Build the strongest possible case using only what exists in the work history and additional qualifications. Treat them as the ideal candidate. Position the candidate as a direct and highly competitive match whenever the work history provides a reasonable functional basis.
 
-Evaluate the candidate's experience as a whole. Determine what professional competencies, capabilities, and transferable skills are reasonably demonstrated by the work described. The standard is not whether the rewritten language appears verbatim in the source material. The standard is whether the candidate's documented experience reasonably supports the substance of the claim.
+COMPETITIVE POSITIONING PRINCIPLES:
+1) MIRROR THE POSTING LANGUAGE EXACTLY - use the hiring manager's own words and phrases. Critical terms must appear within experience bullets, not only in the competencies section.
+2) STRATEGIC INFERENCE - infer reasonable scope, complexity, business impact, and strategic value from the documented work. If the candidate performed a recognized function without carrying that exact title, use the accepted market terminology. Do not require exact terminology in the source material before using an accurate market equivalent. Do not unnecessarily describe experience as transferable, adjacent, exposure to, or familiarity with.
+3) REFRAME ACTIVITY AS IMPACT - never describe what someone did, describe what they achieved, built, or drove.
+4) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position.
+5) ADD UNSTATED CONTEXT - scope, scale, complexity, environment, and stakes implied in the work history.
+6) QUANTIFY EVERYTHING POSSIBLE - use every metric. Where numbers are implied by context, reflect the scale.
+7) BRIDGE GAPS CONFIDENTLY - articulate the strongest connection between what they have and what is needed. Never acknowledge a gap, bridge it. Show relevance through wording and positioning, never state it explicitly.
+8) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome.
+9) ADDITIONAL QUALIFICATIONS - treat any additional qualifications provided as valid candidate evidence. Use certifications, systems, education, clearances, and awards strategically when they align with the target role. Place them appropriately: education and certifications in the summary or competencies; systems and technical skills in relevant experience bullets; awards where they provide persuasive performance evidence.
+10) BULLET DEPTH - review and preserve the substance of the candidate's complete work history. Do not arbitrarily reduce each role to a fixed number of bullets. Preserve all significant accomplishments, responsibilities, metrics, leadership scope, specialized expertise, and experience relevant to the target role. The number and depth of bullets should reflect the candidate's career length, seniority, breadth, and relevance. Consolidate only genuinely repetitive or low-value content. Give the most relevant role the greatest depth. Use earlier roles to reinforce relevant experience and career progression. Front-load the most relevant function, result, or scope in each bullet.
+11) Never use em dashes. Use plain punctuation only.
+12) Never ask questions or acknowledge limitations. Execute completely with what is provided.
+13) BOUNDARY - do not invent any employer, degree, certification, software platform, industry, clearance, job title, metric, or responsibility with no foundation in the candidate's information provided.
 
-THE CREATIVE ELEVATION STANDARD:
-The system may creatively elevate language, emphasis, relevance, structure, and interpretation.
-The system must not materially inflate authority, ownership, technical expertise, supervisory responsibility, program scope, organizational reach, individual credit, metrics, outcomes, or duties actually performed.
-
-Words such as helped, supported, participated, or coordinated are evidence to consider, not permanent restrictions on future phrasing. If the complete evidence reasonably demonstrates that the candidate effectively led, analyzed, evaluated, developed, advised, managed, or implemented something, use that stronger terminology even when the candidate did not originally use that verb. Conversely, stronger terminology must not be used when the underlying experience does not support the function.
-
-COMPETITIVE INFERENCE:
-Reasonable professional inference is encouraged. The system may infer a competency, significance, or transferable capability when that inference follows naturally from documented actions.
-Ask: Does this language reveal the value of what the candidate actually did, or does it require the candidate to have done something additional?
-If it reveals existing value -- use it.
-If it requires additional experience, authority, ownership, or results that are not supported -- do not use it.
-
-POSTING LANGUAGE:
-Mirror the posting's language and terminology when the candidate's experience genuinely demonstrates the underlying function. Resumes are rarely written using position description language, so do not require the candidate to have used the posting's exact terminology in order to apply it. If the candidate's documented work demonstrates the function that the posting phrase describes -- even when described in plain, informal, or task-level language -- use the stronger posting terminology to describe that work. When using a posting phrase would require the candidate to have done something they did not do, preserve the candidate's experience accurately instead.
-
-BULLET PRINCIPLES:
-1) REFRAME ACTIVITY AS IMPACT - describe what was achieved, built, or driven. Not just what was done.
-2) ELEVATE TO THE LEVEL OF THE ROLE - write at the seniority of the target position.
-3) ADD UNSTATED CONTEXT - scope, scale, complexity, and stakes implied in the work history.
-4) QUANTIFY EVERYTHING POSSIBLE - use every metric. Reflect implied scale where numbers exist.
-5) LEAD WITH IMPACT - every bullet starts with the strongest credential or outcome.
-6) BULLET DEPTH - preserve the substance of the candidate's complete work history. Do not arbitrarily reduce to a fixed number of bullets. Preserve all significant accomplishments, responsibilities, metrics, and leadership scope. Give the most relevant role the greatest depth. Use earlier roles to reinforce relevant experience.
-7) Never end a bullet with a phrase explaining its relevance such as this role requires or this role demands. Show relevance through word choice and framing.
-
-ADDITIONAL QUALIFICATIONS:
-Treat any additional qualifications provided as valid candidate evidence. Use certifications, education, systems, clearances, and awards strategically when they align with the target role.
-
-FINAL TEST - apply to every major claim before finalizing:
-COMPETITIVENESS: Is this the strongest, most persuasive, vacancy-relevant way to describe what the evidence shows this candidate actually did?
-FIDELITY: Could the candidate comfortably explain and defend the substance of this statement in an interview without having to reduce, qualify, or correct the impression created?
-A strong resume must pass both tests. Do not default to conservative wording merely because it is safer. Do not default to aggressive wording merely because it matches the vacancy better. Use the strongest defensible interpretation of the candidate's actual experience.
-
-HARD BOUNDARIES - never cross these regardless of mode:
-Do not invent specific responsibilities with no reasonable basis in the source.
-Do not invent technical skills, systems, tools, certifications, or credentials.
-Do not invent supervisory or decision-making authority.
-Do not invent industries or functional experience the candidate did not have.
-Do not invent employers, clients, projects, or populations.
-Do not invent metrics, percentages, dollar values, team sizes, or quantities.
-Do not invent results or accomplishments not supported by the uploaded information.
-When an exact fact is unavailable, strengthen the qualitative description rather than fabricating specificity.
-
-Never use em dashes. Use plain punctuation only. Never ask questions or acknowledge limitations. Execute completely with what is provided.`;
+For federal roles keep government terminology. For private sector translate federal language into corporate equivalents. Never fabricate anything not present in the provided information.`;
 
   const addQuals = document.getElementById('add-quals')?.value?.trim() || '';
   const ctx = `TARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n${getRoleTypeInstruction()}\n\nWORK HISTORY:\n${history}${addQuals ? '\n\nADDITIONAL QUALIFICATIONS (treat as valid candidate evidence):\n' + addQuals : ''}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;  
@@ -901,7 +803,7 @@ Never use em dashes. Use plain punctuation only. Never ask questions or acknowle
   try {
     // Sequential calls to avoid timeout
     document.getElementById('status-text').textContent = 'Generating bullets...';
-    const bullets = await callClaude(system, ctx + '\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Follow this logic: STEP 1 - Identify the primary job function from the title and duties. STEP 2 - Identify which role in the work history most directly performs that function. Give that role the most bullets and deepest treatment -- expand, elevate, add organizational context, and lead every bullet with the strongest credential related to this posting. STEP 3 - For all other roles, include all bullets. Reframe each bullet to highlight the most transferable elements for this specific role. If a bullet connects directly to the posting, lead with that connection. If a bullet does not connect directly, find the bridge and articulate it. Never remove a bullet. STEP 4 - Weave in all quantifiable metrics from the work history. Use strong action verbs. No em dashes. Format as bullet points grouped by role with the role title as a bold header. STEP 5 - Never end a bullet with a phrase that explicitly states its relevance to the role such as this role requires, this role demands, consistent with what this role needs, or similar commentary. The connection to the role must be evident from how the bullet is written through word choice and framing not through explicit explanation. Show relevance, never state it.');
+    const bullets = await callClaude(system, ctx + '\n\nTASK: Rewrite and enhance the bullet points from the work history to directly mirror the job duties and qualifications. Follow this logic: STEP 1 - Identify the primary job function from the title and duties. STEP 2 - Identify which role in the work history most directly performs that function. Give that role the most bullets and deepest treatment -- expand, elevate, add organizational context, and lead every bullet with the strongest credential related to this posting. STEP 3 - For all other roles, include all bullets. Reframe each bullet to highlight the most transferable elements for this specific role. If a bullet connects directly to the posting, lead with that connection. If a bullet does not connect directly, find the bridge and articulate it. Never remove a bullet. STEP 4 - Weave in all quantifiable metrics from the work history. Use strong action verbs. No em dashes. Format as bullet points grouped by role with the role title as a bold header. STEP 5 - Never end a bullet with a phrase that explicitly states its relevance to the role such as this role requires, this role demands, consistent with what this role needs, or similar commentary. The connection to the role must be evident from how the bullet is written through word choice and framing not through explicit explanation. Show relevance, never state it. STEP 6 - Identify the top 10 highest-frequency keywords and phrases from the job duties and required qualifications -- these are the terms the employer is screening for most heavily. Ensure each of these terms appears at least 3 times naturally across the combined output of bullet points and professional summary. The repetition must feel organic and contextually appropriate, never forced or awkward. Vary the sentence structure around each repeated term so it reads as genuine depth of experience rather than keyword stuffing. Priority terms should appear in the most prominent roles first.');
     renderOut('bullets-out', bullets);
 
     document.getElementById('status-text').textContent = 'Generating summary...';
@@ -931,51 +833,8 @@ if (compEl) {
       document.getElementById('additions-card').style.display = 'none';
     }
 
-    // FRAMING NOTES
-    document.getElementById('status-text').textContent = 'Analyzing framing...';
-    document.getElementById('framing-card').style.display = 'block';
-    loading('framing-out', 'Reviewing bullets for framing concerns...');
-    const roleTypeLabel = currentRoleType === 'federal' ? 'FEDERAL GOVERNMENT' : currentRoleType === 'contractor' ? 'FEDERAL CONTRACTOR' : 'PRIVATE SECTOR';
-    const framingRules = currentRoleType === 'federal'
-      ? 'FEDERAL PRECISION MODE: Flag any bullet where adjacent experience is presented as direct specialized experience. Preserve distinctions between performed, supervised, coordinated, reviewed, and supported. If a required specialized experience element is not clearly supported, flag it. Do not turn advisory roles into ownership roles.'
-      : currentRoleType === 'contractor'
-      ? 'CONTRACTOR TRANSLATION MODE: Translate government terminology into contractor/client-delivery language. Emphasize federal environment knowledge, stakeholder management, and program delivery. Flag any claims where authority or function ownership is overstated beyond what the candidate actually held.'
-      : 'PRIVATE SECTOR TRANSFERABILITY MODE: Surface transferable experience aggressively. Reframe federal processes as private-sector equivalents. Prioritize outcomes, scale, and business impact. Only flag items where the framing would be genuinely misleading to a private sector hiring manager.';
-
-    const framingPrompt = ctx + '\n\nGENERATED BULLETS TO REVIEW:\n' + bullets + '\n\nTASK: Review the generated bullets against the original work history for framing concerns. Application type: ' + roleTypeLabel + '. ' + framingRules + '\n\nFor each concern found, provide exactly this format:\n\n**[Topic]**\nFlag: [what the tension is in one sentence]\nSuggested framing: "[exact example sentence the candidate can use or adapt]"\nAvoid: [specific language not to use]\n\nIf there are no framing concerns, say exactly: "No framing concerns identified. All bullets reflect direct experience as stated in your work history."\n\nBe specific and honest. This is to protect the candidate, not discourage them.';
-    const framing = await callClaude(system, framingPrompt);
-    const framingEl = document.getElementById('framing-out');
-    if (framingEl) { framingEl.innerHTML = marked.parse(framing); framingEl.classList.remove('placeholder'); }
-
-    // RAW SCORE (original work history)
-    document.getElementById('status-text').textContent = 'Calculating match scores...';
-    document.getElementById('score-card').style.display = 'block';
-    const rawScoreRaw = await callClaude(system, `TARGET JOB TITLE: ${title || 'Not specified'}\nWORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}\n\nTASK: Score this candidate's RAW UNMODIFIED work history against this job posting. Return ONLY a JSON object: {"overall":[0-100],"note":"one sentence on raw baseline strength"}`);
-
-    // TAILORED SCORE (generated resume)
-    const tailoredScoreRaw = await callClaude(system, ctx + '\n\nGENERATED RESUME CONTENT:\n' + bullets + '\n\n' + summary + '\n\nTASK: Score this TAILORED RESUME against the job posting using this rubric: 30pts qualifications coverage, 25pts job duties alignment, 20pts keyword coverage, 15pts evidence and metrics, 10pts seniority alignment. Return ONLY a JSON object: {"overall":[0-100],"keyword_match":[0-100],"experience_alignment":[0-100],"qualifications_coverage":[0-100],"summary":"2-3 sentence assessment of tailored resume strengths, remaining gaps, and what would improve the score further"}');
-
-    // Render scores
-    try {
-      const rawScore = JSON.parse(rawScoreRaw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-      document.getElementById('score-raw').textContent = rawScore.overall || '--';
-    } catch(e) { document.getElementById('score-raw').textContent = '--'; }
-
-    try {
-      const s = JSON.parse(tailoredScoreRaw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-      const overall = s.overall || 0;
-      document.getElementById('score-num').textContent = overall;
-      document.getElementById('score-label').textContent = overall >= 85 ? 'Strong Match' : overall >= 70 ? 'Competitive Match' : overall >= 55 ? 'Developing Match' : 'Needs Tailoring';
-      const bars = { kw: s.keyword_match || 0, exp: s.experience_alignment || 0, qual: s.qualifications_coverage || 0, overall };
-      Object.entries(bars).forEach(([k, v]) => {
-        document.getElementById('bar-' + k).textContent = v + '%';
-        setTimeout(() => { document.getElementById('fill-' + k).style.width = v + '%'; }, 100);
-      });
-      document.getElementById('score-summary').textContent = s.summary || '';
-    } catch(e) { document.getElementById('score-summary').textContent = 'Score calculation failed.'; }
-
     lastOutputs = { title, company, bullets, summary, competencies, score: 0, cover: null, keywords: null };
-    document.getElementById('status-text').textContent = 'Done - review framing notes before submitting. Add cover letter or title alignment below.';
+    document.getElementById('status-text').textContent = 'Done - want more? Add cover letter, gap analysis, or strength score below.';
     document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
