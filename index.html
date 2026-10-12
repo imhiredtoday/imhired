@@ -603,7 +603,15 @@ async function callClaude(system, user) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, system, messages: [{ role: 'user', content: user }] })
   });
-  const data = await res.json();
+  if (!res.ok) {
+    throw new Error('Server error ' + res.status + ' -- the request timed out or failed. Please try again.');
+  }
+  let data;
+  try {
+    data = await res.json();
+  } catch(e) {
+    throw new Error('The server returned an unexpected response (status ' + res.status + '). Please try again.');
+  }
   if (data.error) throw new Error(data.error.message);
   return data.content?.find(b => b.type === 'text')?.text || '';
 }
@@ -750,7 +758,6 @@ async function generateAll() {
   loading('bullets-out', 'Tailoring your bullet points...');
   loading('summary-out', 'Crafting your professional summary...');
   loading('competencies-out', 'Building your competencies block...');
-  loading('keywords-out', 'Running keywords gap analysis...');
   document.getElementById('score-num').textContent = '--';
   document.getElementById('score-label').textContent = 'Analyzing...';
   document.getElementById('score-summary').textContent = 'Generating your strength assessment...';
@@ -838,15 +845,18 @@ if (compEl) {
     document.getElementById('phase2-btns').style.display = 'block';
 
   } catch(err) {
-    const errMsg = 'Error: ' + err.message + '. Try the Open in Claude button instead.';
+    const errMsg = 'Something went wrong: ' + err.message + '. Please try again.';
     ['bullets-out','summary-out','competencies-out'].forEach(id => {
       const el = document.getElementById(id);
-      if (el && (el.innerHTML === '' || el.classList.contains('placeholder'))) {
-        el.textContent = errMsg;
-        el.classList.remove('placeholder');
+      if (el) {
+        const txt = el.innerText || el.textContent || '';
+        if (!txt || txt.includes('Tailoring') || txt.includes('Crafting') || txt.includes('Building') || txt.includes('will appear')) {
+          el.innerHTML = '<span style="color:#c96e6e;font-size:13px;">' + errMsg + '</span>';
+          el.classList.remove('placeholder');
+        }
       }
     });
-    document.getElementById('status-text').textContent = 'Generation failed. Check your inputs and try again.';
+    document.getElementById('status-text').textContent = 'Generation failed -- please try again.';
     console.error('Generation error:', err);
   }
 
@@ -1084,7 +1094,7 @@ function openInClaude() {
   const duties = document.getElementById('job-duties').value.trim();
   const quals = document.getElementById('job-quals').value.trim();
   if (!history) { alert('Please paste your work history first.'); return; }
-  const extras = wantCover ? ' Also generate a cover letter.' : '';
+  const extras = '';
   const prompt = `Please tailor my resume for the following role. Generate: tailored bullet points grouped by role, a professional summary, a ranked core competencies block (top 12, pipe-separated, ready to paste), a keywords gap analysis, and a tailored resume match score out of 100 with breakdown across keyword match, experience alignment, qualifications coverage, and overall competitiveness.${extras}\n\nTARGET JOB TITLE: ${title || 'Not specified'}\nCOMPANY: ${company || 'Not specified'}\n\nMY WORK HISTORY:\n${history}\n\nJOB DUTIES:\n${duties || 'Not provided'}\n\nREQUIRED QUALIFICATIONS:\n${quals || 'Not provided'}`;
   window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
 }
